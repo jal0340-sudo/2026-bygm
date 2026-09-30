@@ -1,0 +1,1290 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>글빛 도우미</title>
+<style>
+:root {
+  --bg: #f5f6fa;
+  --panel: #ffffff;
+  --text: #1f2430;
+  --muted: #5f6677;
+  --line: #e1e4ec;
+  --soft: #f0f2f7;
+  --accent: #3b5bdb;
+  --accent-weak: #e8edff;
+  --accent-text: #ffffff;
+  --ok: #2b8a3e;
+  --ok-bg: #e9f7ee;
+  --warn: #b35c00;
+  --warn-bg: #fff4e6;
+  --c-ending: #e8590c;  --c-ending-bg: #ffe8d6;
+  --c-style: #7048e8;   --c-style-bg: #ece6ff;
+  --c-spell: #e03131;   --c-spell-bg: #ffe3e3;
+  --c-long: #1c7ed6;    --c-long-bg: #e3f0ff;
+  --c-agree: #2f9e44;   --c-agree-bg: #e3f6e8;
+  --shadow: 0 1px 2px rgba(20, 30, 60, .06), 0 4px 16px rgba(20, 30, 60, .06);
+  --radius: 14px;
+  --font: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", "Noto Sans KR", "Segoe UI", sans-serif;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #15171c; --panel: #1e2128; --text: #e7e9ee; --muted: #a2a8b6; --line: #333844; --soft: #262a33;
+    --accent: #7c95ff; --accent-weak: #2a3150; --accent-text: #10131a;
+    --ok: #69db7c; --ok-bg: #1f3326; --warn: #ffb35c; --warn-bg: #3a2b19;
+    --c-ending: #ff922b; --c-ending-bg: #4a2d14;
+    --c-style: #b197fc;  --c-style-bg: #352a55;
+    --c-spell: #ff6b6b;  --c-spell-bg: #4d2226;
+    --c-long: #74c0fc;   --c-long-bg: #1c3450;
+    --c-agree: #69db7c;  --c-agree-bg: #1f3a28;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 16px rgba(0, 0, 0, .25);
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 16px; line-height: 1.6; word-break: keep-all; overflow-wrap: anywhere; }
+button, select, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; }
+[hidden] { display: none !important; }
+
+/* 머리말 */
+.app-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 20px; background: var(--panel); border-bottom: 1px solid var(--line); }
+.brand { display: flex; align-items: baseline; gap: 10px; font-weight: 800; font-size: 20px; }
+.brand .logo { color: var(--accent); }
+.brand small { font-weight: 500; font-size: 13px; color: var(--muted); }
+.steps { display: flex; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 13px; color: var(--muted); }
+.steps li { padding: 3px 10px; border-radius: 999px; background: var(--soft); }
+
+/* 좌우 분할 */
+.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding: 16px; height: calc(100vh - 58px); height: calc(100dvh - 58px); }
+.pane { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 0; min-width: 0; }
+.pane-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 14px 16px 10px; }
+.pane-head h2 { margin: 0; font-size: 17px; }
+.tools { display: flex; gap: 6px; flex-wrap: wrap; }
+
+/* 편집창 */
+#editor { flex: 1; min-height: 0; margin: 0 16px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); resize: none; font-size: 17px; line-height: 1.9; outline: none; }
+#editor:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-weak); }
+#editor::selection { background: #ffd43b; color: #000; }
+.stats { padding: 8px 18px 0; font-size: 14px; color: var(--muted); }
+.stats b { color: var(--text); }
+.privacy { margin: 6px 16px 14px; padding: 8px 12px; font-size: 13px; color: var(--muted); background: var(--soft); border-radius: 8px; }
+
+/* 버튼 */
+.btn { border: 1px solid var(--line); background: var(--panel); border-radius: 10px; padding: 7px 14px; font-weight: 600; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); padding: 10px 20px; font-size: 16px; }
+.btn.primary:hover { filter: brightness(1.08); }
+.btn.small { padding: 5px 12px; font-size: 14px; }
+.btn.ghost { font-size: 14px; padding: 6px 12px; }
+.linkbtn { border: 0; background: none; color: var(--accent); font-weight: 700; text-decoration: underline; padding: 0 4px; }
+
+/* 오른쪽 */
+.type-row { display: flex; align-items: center; gap: 10px; padding: 14px 16px 8px; flex-wrap: wrap; }
+.type-row label { font-weight: 700; }
+#genre { padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); min-width: 170px; max-width: 100%; }
+#genre.attn { outline: 3px solid var(--warn); animation: shake .4s; }
+.type-row .hint { font-size: 13px; color: var(--muted); }
+@keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+
+.tabs { display: flex; gap: 4px; padding: 6px 16px 0; border-bottom: 1px solid var(--line); }
+.tabs [role="tab"] { flex: 1; border: 0; border-bottom: 3px solid transparent; background: none; padding: 10px 8px; font-weight: 700; color: var(--muted); text-align: center; }
+.tabs [role="tab"] span { display: block; font-size: 12px; font-weight: 500; }
+.tabs [role="tab"][aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
+.tab-panel { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; }
+.panel-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
+.panel-actions .hint { margin: 0; font-size: 14px; color: var(--muted); flex: 1; min-width: 180px; }
+.stale { margin-bottom: 12px; padding: 10px 12px; border-radius: 10px; background: var(--warn-bg); color: var(--warn); font-size: 14px; font-weight: 600; }
+
+.empty { padding: 24px 18px; text-align: center; color: var(--muted); background: var(--soft); border-radius: 12px; }
+.empty b { color: var(--text); display: block; margin-bottom: 6px; font-size: 17px; }
+.empty p { margin: 4px 0; }
+.empty.good b { color: var(--ok); }
+.muted { color: var(--muted); }
+
+/* 문체 선택 */
+.style-box { padding: 14px; border: 1px solid var(--line); border-radius: 12px; margin-bottom: 14px; }
+.style-box h3 { margin: 0 0 4px; font-size: 15px; }
+.style-box p { margin: 0 0 10px; font-size: 14px; }
+.style-opts { display: flex; flex-wrap: wrap; gap: 8px; }
+.style-opt { display: grid; grid-template-columns: auto 1fr; column-gap: 8px; align-items: center; padding: 8px 12px; border: 2px solid var(--line); border-radius: 10px; cursor: pointer; min-width: 150px; }
+.style-opt input { grid-row: span 2; accent-color: var(--c-style); width: 18px; height: 18px; margin: 0; }
+.style-opt .so-name { font-weight: 700; }
+.style-opt .so-name em { font-style: normal; font-weight: 600; font-size: 13px; color: var(--muted); margin-left: 4px; }
+.style-opt .so-ex { font-size: 12px; color: var(--muted); }
+.style-opt.on { border-color: var(--c-style); background: var(--c-style-bg); }
+
+.summary { margin: 0 0 10px; font-size: 15px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 4px 12px; font-size: 14px; opacity: .55; }
+.chip.on { opacity: 1; }
+.chip:disabled { opacity: .35; cursor: default; }
+.chip i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+/* 하이라이트 미리보기 */
+.preview { white-space: pre-wrap; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--soft); line-height: 2.1; font-size: 16px; margin-bottom: 16px; max-height: 42vh; overflow-y: auto; }
+.preview [data-ids] { cursor: pointer; border-radius: 3px; }
+.hl-ending { background: var(--c-ending-bg); box-shadow: inset 0 -2px 0 var(--c-ending); }
+.hl-style  { background: var(--c-style-bg);  box-shadow: inset 0 -2px 0 var(--c-style); }
+.hl-spell  { background: var(--c-spell-bg);  box-shadow: inset 0 -2px 0 var(--c-spell); }
+.u-long  { border-bottom: 2px dashed var(--c-long); }
+.u-agree { text-decoration: underline wavy var(--c-agree); text-decoration-thickness: 1.5px; text-underline-offset: 5px; }
+
+.c-ending { --cat: var(--c-ending); --cat-bg: var(--c-ending-bg); }
+.c-style  { --cat: var(--c-style);  --cat-bg: var(--c-style-bg); }
+.c-spell  { --cat: var(--c-spell);  --cat-bg: var(--c-spell-bg); }
+.c-long   { --cat: var(--c-long);   --cat-bg: var(--c-long-bg); }
+.c-agree  { --cat: var(--c-agree);  --cat-bg: var(--c-agree-bg); }
+.chip i { background: var(--cat); }
+
+/* 카드 */
+.cards { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.card { border: 1px solid var(--line); border-left: 5px solid var(--cat); border-radius: 12px; padding: 12px 14px; background: var(--panel); transition: opacity .2s, box-shadow .3s; }
+.card.flash { box-shadow: 0 0 0 3px var(--cat); }
+.card.done { opacity: .5; }
+.card-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
+.badge { font-size: 13px; font-weight: 700; color: var(--cat); background: var(--cat-bg); padding: 2px 10px; border-radius: 999px; }
+.where { font-size: 12px; color: var(--muted); }
+.card blockquote { margin: 0 0 8px; padding: 6px 10px; background: var(--soft); border-radius: 8px; font-size: 15px; }
+.card blockquote mark { background: var(--cat-bg); color: inherit; box-shadow: inset 0 -2px 0 var(--cat); border-radius: 2px; }
+.card .msg { margin: 0 0 6px; }
+.sugg { margin: 0 0 6px; font-size: 15px; }
+.sugg s { color: var(--muted); }
+.sugg b { color: var(--cat); }
+.ex { margin: 0 0 6px; font-size: 14px; color: var(--muted); }
+.ex span { display: inline-block; font-size: 12px; font-weight: 700; color: var(--accent); background: var(--accent-weak); border-radius: 6px; padding: 0 6px; margin-right: 6px; }
+.card-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
+.done-check { font-size: 14px; display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.done-check input { width: 18px; height: 18px; accent-color: var(--ok); }
+.next { margin-top: 18px; text-align: right; }
+
+/* 2단계 */
+.s2-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.s2-head h3 { margin: 0; font-size: 18px; }
+.progress { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); }
+.progress b { color: var(--text); }
+.bar { width: 110px; height: 8px; background: var(--soft); border-radius: 999px; overflow: hidden; }
+.bar i { display: block; height: 100%; background: var(--ok); transition: width .3s; }
+.note, .para-note { font-size: 14px; color: var(--muted); margin: 0 0 10px; }
+.para-note { color: var(--warn); background: var(--warn-bg); padding: 8px 12px; border-radius: 8px; }
+.s2-sec h4 { margin: 18px 0 8px; font-size: 15px; color: var(--accent); }
+.checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.ck { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; background: var(--panel); }
+.ck.checked { background: var(--ok-bg); border-color: var(--ok); }
+.ck-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+.ck-top label { display: flex; gap: 10px; align-items: flex-start; font-weight: 700; cursor: pointer; }
+.ck-top input { width: 20px; height: 20px; margin-top: 3px; accent-color: var(--ok); flex: none; }
+.auto { flex: none; font-size: 12px; font-weight: 700; padding: 2px 8px; border-radius: 999px; }
+.ck.ok .auto { color: var(--ok); background: var(--ok-bg); }
+.ck.check .auto { color: var(--warn); background: var(--warn-bg); }
+.ck-desc { margin: 6px 0 0 30px; font-size: 14px; color: var(--muted); }
+.ck-note { margin: 6px 0 0 30px; font-size: 14px; font-weight: 600; }
+.evidence { margin: 6px 0 0 30px; display: flex; flex-direction: column; gap: 4px; }
+.quote { text-align: left; border: 0; background: var(--soft); border-radius: 8px; padding: 5px 10px; font-size: 14px; }
+.quote:hover { background: var(--accent-weak); }
+.ck details { margin: 8px 0 0 30px; font-size: 14px; }
+.ck summary { cursor: pointer; color: var(--accent); font-weight: 700; }
+.ck details p { margin: 6px 0 0; }
+.finish { margin-top: 16px; padding: 14px; border-radius: 12px; background: var(--ok-bg); color: var(--ok); font-weight: 700; text-align: center; }
+
+/* 알림 */
+#toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); background: #222; color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 15px; opacity: 0; pointer-events: none; transition: .25s; z-index: 10; max-width: calc(100% - 32px); }
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+#mirror { position: absolute; top: 0; left: -9999px; visibility: hidden; white-space: pre-wrap; overflow-wrap: break-word; border: 0; }
+
+/* 태블릿 세로 · 스마트폰 */
+@media (max-width: 899px) {
+  .split { grid-template-columns: minmax(0, 1fr); height: auto; padding: 12px; gap: 12px; }
+  #editor { min-height: 50vh; flex: none; }
+  .tab-panel { overflow: visible; }
+  .preview { max-height: none; }
+  .steps { display: none; }
+  .app-header { padding: 10px 16px; }
+}
+</style>
+</head>
+<body>
+<header class="app-header">
+  <div class="brand"><span class="logo" aria-hidden="true">✦</span>글빛 도우미<small>중학생 글쓰기 2단계 퇴고</small></div>
+  <ol class="steps">
+    <li>① 글 입력</li><li>② 1단계 점검</li><li>③ 글 유형 선택</li><li>④ 2단계 점검</li>
+  </ol>
+</header>
+
+<main class="split">
+  <section class="pane" aria-label="글 입력">
+    <div class="pane-head">
+      <h2>✍️ 내 글</h2>
+      <div class="tools">
+        <button type="button" class="btn ghost" id="btnSample">예시 글</button>
+        <button type="button" class="btn ghost" id="btnCopy">복사</button>
+        <button type="button" class="btn ghost" id="btnClear">지우기</button>
+      </div>
+    </div>
+    <textarea id="editor" spellcheck="false" aria-label="글 입력 편집창" placeholder="공책에 쓴 초고를 여기에 옮겨 적어 보세요.
+
+· 첫 줄에 제목을 쓰면, 제목은 빼고 점검해요.
+· 문단이 바뀌는 곳에서는 줄을 바꾸거나 한 줄을 띄어 주세요."></textarea>
+    <div class="stats" id="stats"></div>
+    <p class="privacy">🔒 글은 이 기기의 브라우저 안에서만 처리되고, 어디에도 저장·전송되지 않아요. 창을 닫으면 사라지니 <b>복사</b>로 옮겨 두세요.</p>
+  </section>
+
+  <section class="pane" aria-label="피드백">
+    <div class="type-row">
+      <label for="genre">글 유형</label>
+      <select id="genre">
+        <option value="">— 골라 주세요 —</option>
+        <option value="explain">설명하는 글</option>
+        <option value="argue">주장하는 글</option>
+        <option value="heart">마음을 전하는 글</option>
+      </select>
+      <span class="hint">2단계 점검 전에 골라 주세요.</span>
+    </div>
+    <div class="tabs" role="tablist">
+      <button type="button" role="tab" id="tab1" aria-controls="panel1" aria-selected="true">1단계<span>문장·표현·맞춤법·호응</span></button>
+      <button type="button" role="tab" id="tab2" aria-controls="panel2" aria-selected="false">2단계<span>구조·내용</span></button>
+    </div>
+
+    <div class="tab-panel" id="panel1" role="tabpanel" aria-labelledby="tab1">
+      <div class="panel-actions">
+        <button type="button" class="btn primary" id="btnStage1">1단계 점검</button>
+        <p class="hint">구어체 어미, 문체, 긴 문장, 맞춤법·띄어쓰기, 문장 호응을 살펴봐요.</p>
+      </div>
+      <div class="stale" id="stale1" hidden>글이 바뀌었어요. 고친 글로 <button type="button" class="linkbtn" data-rerun="1">다시 점검</button>해 보세요.</div>
+      <div id="result1">
+        <div class="empty">
+          <b>왼쪽에 글을 입력하고 [1단계 점검]을 눌러 보세요.</b>
+          <p>어색한 어미(~했음), 섞여 쓴 문체, 60자가 넘는 긴 문장,<br>자주 틀리는 맞춤법·띄어쓰기, 어색한 문장 호응을 찾아 줘요.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="tab-panel" id="panel2" role="tabpanel" aria-labelledby="tab2" hidden>
+      <div class="panel-actions">
+        <button type="button" class="btn primary" id="btnStage2">2단계 점검</button>
+        <p class="hint" id="hint2">위에서 글 유형을 먼저 골라 주세요.</p>
+      </div>
+      <div class="stale" id="stale2" hidden>글이 바뀌었어요. 고친 글로 <button type="button" class="linkbtn" data-rerun="2">다시 점검</button>해 보세요.</div>
+      <div id="result2">
+        <div class="empty">
+          <b>글 유형을 고르고 [2단계 점검]을 눌러 보세요.</b>
+          <p>글 유형에 꼭 필요한 짜임(처음·중간·끝)과 내용 요소를<br>점검표로 하나씩 확인할 수 있어요.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<div id="toast" role="status" aria-live="polite"></div>
+<div id="mirror" aria-hidden="true"></div>
+
+<script>
+'use strict';
+
+/* =========================================================
+   한글 도우미 함수
+   ========================================================= */
+const isHangul = ch => !!ch && ch >= '가' && ch <= '힣';
+// 받침 번호 (0: 없음, 4: ㄴ, 8: ㄹ, 16: ㅁ, 17: ㅂ, 18: ㅄ, 20: ㅆ)
+const jong = ch => isHangul(ch) ? (ch.charCodeAt(0) - 0xAC00) % 28 : -1;
+// 중성 번호 (0: ㅏ, 8: ㅗ)
+const jung = ch => isHangul(ch) ? Math.floor(((ch.charCodeAt(0) - 0xAC00) % 588) / 28) : -1;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+/* =========================================================
+   문장 나누기
+   ========================================================= */
+const END_PUNCT = '.?!…';
+const CLOSERS = '"\'”’)」』]';
+const QUOTES = '"\'”’」』';
+
+function splitSentences(text) {
+  const out = [];
+  let start = 0;
+  const push = (a, b) => {
+    while (a < b && /\s/.test(text[a])) a++;
+    while (b > a && /\s/.test(text[b - 1])) b--;
+    if (b > a) out.push({ start: a, end: b, text: text.slice(a, b) });
+  };
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (c === '\n') { push(start, i); start = i + 1; continue; }
+    if (!END_PUNCT.includes(c)) continue;
+    let j = i + 1;
+    while (j < text.length && END_PUNCT.includes(text[j])) j++;
+    const closeFrom = j;
+    while (j < text.length && CLOSERS.includes(text[j])) j++;
+    if (j < text.length && !/\s/.test(text[j])) continue;
+    // "괜찮다." 하시며 … 처럼 인용 뒤에 문장이 이어지면 나누지 않음
+    if ([...text.slice(closeFrom, j)].some(ch => QUOTES.includes(ch))) {
+      const rest = text.slice(j).replace(/^[ \t]+/, '');
+      if (/^(하|라|고|며|말|이라)/.test(rest)) continue;
+    }
+    push(start, j);
+    start = j;
+    i = j - 1;
+  }
+  push(start, text.length);
+  return out;
+}
+
+// 문장마다 끝말·제목 여부 등을 붙임
+function analyzeSentences(text) {
+  const sents = splitSentences(text);
+  if (sents.length > 1) {
+    const s = sents[0];
+    const hasNextLine = text.indexOf('\n', s.start) !== -1;
+    if (hasNextLine && !/[.?!…]["'”’)」』\]]*$/.test(s.text) && s.text.length <= 40) s.isTitle = true;
+  }
+  let n = 0;
+  sents.forEach(s => {
+    s.core = s.text.replace(/[^가-힣ㄱ-ㅎㅏ-ㅣA-Za-z0-9]+$/, '');
+    s.coreEnd = s.start + s.core.length;
+    const idx = s.core.search(/\S+$/);
+    s.lw = idx >= 0 ? s.core.slice(idx) : '';
+    s.lwStart = s.start + Math.max(idx, 0);
+    s.words = s.core ? s.core.split(/\s+/).length : 0;
+    s.isQuote = /^["“'‘「『]/.test(s.text);
+    s.isGreeting = /,$/.test(s.text);
+    s.no = s.isTitle ? 0 : ++n;
+  });
+  return sents;
+}
+
+/* =========================================================
+   문체
+   ========================================================= */
+const STYLES = {
+  handa:   { label: '한다체',     ex: '~한다, ~했다, ~이다' },
+  hamnida: { label: '합니다체',   ex: '~합니다, ~했습니다, ~입니다' },
+  haeyo:   { label: '해요체',     ex: '~해요, ~했어요, ~이에요' },
+  hae:     { label: '해체(반말)', ex: '~해, ~했어, ~이야' },
+};
+
+const COLLOQ_EXCEPT = ['마음', '처음', '다음', '웃음', '얼음', '울음', '죽음', '믿음', '걸음', '모음', '소음', '발음', '녹음', '잡음', '졸음', '물음', '고음', '화음', '게임', '모임', '책임', '사물함', '우편함', '신발함', '보관함', '수납함', '투표함', '모금함'];
+
+// 구어체 어미(~했음, ~임, ~함, ~거임, ~듯)와 인터넷 말투(ㅋㅋ)
+function colloqInfo(s) {
+  if (s.isTitle) return null;
+  const w = s.lw;
+  if (!w) return null;
+  if (/[ㅋㅎㅠㅜ]{2,}$/.test(w)) return { type: 'slang' };
+  if (COLLOQ_EXCEPT.some(x => w.endsWith(x))) return null;
+  if (/거임$/.test(w) || /듯$/.test(w)) return { type: 'end' };
+  if (s.words >= 2 && w.length >= 2 && /(음|임|함|됨|슴)$/.test(w)) return { type: 'end' };
+  return null;
+}
+
+function classifyStyle(s) {
+  if (s.isTitle || s.isQuote || s.isGreeting) return null;
+  const w = s.lw;
+  if (!w || !isHangul(w.slice(-1))) return null;
+  if (/(에게|한테|께|에게서|께서)$/.test(w)) return null;
+  if (colloqInfo(s)) return null;
+  if (/(니다|니까|십시오)$/.test(w)) return 'hamnida';
+  if (/시다$/.test(w) && w.length >= 3 && jong(w[w.length - 3]) === 17) return 'hamnida'; // 합시다
+  if (/[요죠]$/.test(w)) return 'haeyo';
+  if (/다$/.test(w)) return 'handa';
+  if (/(는가|은가|인가|던가|을까|일까|는지|느냐|으냐|냐|자|라)$/.test(w)) return 'handa';
+  if (/까$/.test(w) && jong(w[w.length - 2]) === 8) return 'handa'; // 할까
+  if (/(어|아|야|지|해|네|래|게|걸|거든|잖아|니|돼|줘|봐|와|워)$/.test(w)) return 'hae';
+  return null;
+}
+
+/* 문장 끝말을 다른 문체로 바꾼 예시 만들기 */
+const ADJ_HA = ['필요', '중요', '행복', '소중', '편리', '위험', '깨끗', '따뜻', '편안', '불편', '유용', '다양', '충분', '부족', '가능', '심각', '확실', '분명', '비슷', '당연', '건강', '친절', '궁금', '피곤', '우울', '답답', '미안', '죄송', '조용', '정확', '특별', '유명', '적당', '유익', '이상', '정직', '성실', '용감', '똑똑', '씩씩', '든든', '뿌듯', '속상', '섭섭', '감사'];
+
+function endingKind(w) {
+  let m;
+  if ((m = w.match(/^(.*)거임$/))) return { kind: 'cop', stem: m[1] ? m[1] + ' 것' : '것' };
+  if ((m = w.match(/^(.*)듯$/))) return { kind: 'seem', stem: m[1] };
+  // ‘안돼’, ‘못해’처럼 붙여 쓴 말은 바꿀 때 띄어 씀
+  const neg = st => (st === '안' || st === '못') ? st + ' ' : st;
+  if ((m = w.match(/^(.*)(된다|됩니다|돼요|되요|돼|됨)$/))) return { kind: 'doe', stem: neg(m[1]) };
+  if ((m = w.match(/^(.*)(한다|합니다|해요|해|함)$/))) return { kind: 'ha', stem: neg(m[1]) };
+  if ((m = w.match(/^(.+)(이다|입니다|이에요|이야|임|예요)$/))) return { kind: 'cop', stem: m[1] };
+  if ((m = w.match(/^(.*?[가-힣])(습니다|어요|다|어|음|슴)$/))) {
+    const j = jong(m[1].slice(-1));
+    if (j === 20 || j === 18) return { kind: 'past', stem: m[1] };
+  }
+  if ((m = w.match(/^(.*(좋|싫|많|적|같|작|높|낮|넓|좁|깊|늦|옳))음$/))) return { kind: 'adj', stem: m[1] };
+  return null;
+}
+
+function convertEnding(k, target) {
+  if (!k) return null;
+  const st = k.stem;
+  const last = st.slice(-1);
+  switch (k.kind) {
+    case 'past': return { handa: st + '다', hamnida: st + '습니다', haeyo: st + '어요', hae: st + '어' }[target];
+    case 'adj': {
+      const v = jung(last);
+      const a = (v === 0 || v === 8) ? '아' : '어';
+      return { handa: st + '다', hamnida: st + '습니다', haeyo: st + a + '요', hae: st + a }[target];
+    }
+    case 'cop': {
+      const hasJ = jong(last) > 0;
+      return { handa: st + '이다', hamnida: st + '입니다', haeyo: st + (hasJ ? '이에요' : '예요'), hae: st + (hasJ ? '이야' : '야') }[target];
+    }
+    case 'ha': {
+      const adj = ADJ_HA.some(a => st.endsWith(a));
+      return { handa: st + (adj ? '하다' : '한다'), hamnida: st + '합니다', haeyo: st + '해요', hae: st + '해' }[target];
+    }
+    case 'doe': return { handa: st + '된다', hamnida: st + '됩니다', haeyo: st + '돼요', hae: st + '돼' }[target];
+    case 'seem': {
+      const p = st ? st + ' ' : '';
+      return { handa: p + '것 같다', hamnida: p + '것 같습니다', haeyo: p + '것 같아요', hae: p + '것 같아' }[target];
+    }
+  }
+  return null;
+}
+
+/* =========================================================
+   1단계 규칙
+   ========================================================= */
+const CATS = {
+  ending: { label: '구어체 표현' },
+  style:  { label: '문체 통일' },
+  spell:  { label: '맞춤법·띄어쓰기' },
+  long:   { label: '긴 문장' },
+  agree:  { label: '문장 호응' },
+};
+const CAT_ORDER = Object.keys(CATS);
+const SENT_CATS = new Set(['long', 'agree']); // 문장 전체에 표시하는 항목
+const LONG_LIMIT = 60; // 공백 포함
+
+// 낱말 앞 경계 (한글이 아닌 글자 또는 글의 처음)
+const B = '(^|[^가-힣])';
+const R = body => new RegExp(B + '(' + body + ')', 'g');
+const wordStart = (t, i) => !isHangul(t[i - 1]);
+const EXC_GEOT = new Set(['별', '날', '탈', '들', '헌']);
+const EXC_GEO = new Set(['근', '논', '선', '준', '별', '전', '헌']);
+
+// kind: 'space' = 띄어쓰기, 없으면 맞춤법 / pre: 1번 묶음(경계 글자)은 표시에서 뺌
+const SPELL = [
+  { re: /몇\s?일/g, fix: '며칠', why: '‘몇 일’이 아니라 ‘며칠’로 써요.' },
+  { re: /금새/g, fix: '금세', why: '‘금시에’가 줄어든 말이라 ‘금세’로 써요.' },
+  { re: /어의\s?없/g, fix: '어이없', why: '기가 막힌다는 뜻의 말은 ‘어이없다’예요.' },
+  { re: /웬지/g, fix: '왠지', why: '‘왜인지’가 줄어든 말이라 ‘왠지’로 써요.' },
+  { re: /왠(일|만|걸)/g, fix: m => '웬' + m[1], why: '‘어찌 된’이라는 뜻일 때는 ‘웬’을 써요. (웬일, 웬만하다)' },
+  { re: /됬/g, fix: '됐', why: '‘되었’이 줄어든 말은 ‘됐’이에요.' },
+  { re: /되요/g, fix: '돼요', why: '‘되어요’가 줄어든 말이라 ‘돼요’로 써요.' },
+  { re: /되서/g, fix: '돼서', why: '‘되어서’가 줄어든 말이라 ‘돼서’로 써요.' },
+  { re: /되(?=[.!?]|\n|$)/g, fix: '돼', why: '문장 끝에서는 ‘되어’가 줄어든 ‘돼’로 써요. (안 돼.)' },
+  { re: /됀/g, fix: '된', why: '‘됀’은 쓰지 않는 글자예요. ‘된’으로 써요.' },
+  { re: /뵈요/g, fix: '봬요', why: '‘뵈어요’가 줄어든 말이라 ‘봬요’로 써요.' },
+  { re: /않\s?(돼|되|된|될)/g, fix: m => '안 ' + m[1], why: '‘아니’가 줄어든 말은 ‘안’이에요. ‘안 되다’로 써요.' },
+  { re: /않\s?(하|했|한|할|해)/g, fix: m => '안 ' + m[1], why: '움직임을 나타내는 말 앞에서 ‘아니’의 뜻으로 쓰는 말은 ‘안’이에요.' },
+  { re: /지\s?안(았|아서|는다|고|다|습니다|기|게)/g, fix: m => '지 않' + m[1], why: '‘-지 아니하다’가 줄어든 말은 ‘않다’예요.' },
+  { re: /어떻해/g, fix: '어떡해', why: '‘어떻게 해’가 줄어든 말은 ‘어떡해’예요.' },
+  { re: /설겆이/g, fix: '설거지', why: '‘설거지’가 표준어예요.' },
+  { re: /오랫만/g, fix: '오랜만', why: '‘오래간만’이 줄어든 말이라 ‘오랜만’이에요.' },
+  { re: /희안/g, fix: '희한', why: '매우 드물고 신기하다는 뜻은 ‘희한하다’예요.' },
+  { re: /일부로/g, fix: '일부러', why: '‘일부러(일부러 그런 것은 아니다)’로 써요.' },
+  { re: /역활/g, fix: '역할', why: '‘역할(役割)’로 써요.' },
+  { re: R('구지|궂이'), pre: true, fix: '굳이', why: '‘굳이’로 쓰고 [구지]로 읽어요.' },
+  { re: /설레임/g, fix: '설렘', why: '‘설레다’의 명사형은 ‘설렘’이에요.' },
+  { re: /바램/g, fix: '바람', why: '‘바라다(희망하다)’의 명사형은 ‘바람’이에요. ‘바램’은 색이 바랠 때 써요.' },
+  { re: /(깨끗|틈틈|곰곰|일일|번번|따뜻|반듯|깊숙|느긋|버젓|산뜻|헛되)히/g, fix: m => m[1] + '이', why: '‘-이’로 끝나는 부사예요.' },
+  { re: /(꼼꼼|솔직|꾸준|조용|가만|열심)이(?=\s|[.,!?]|$)/g, fix: m => m[1] + '히', why: '‘-히’로 끝나는 부사예요.' },
+  { re: /익숙치/g, fix: '익숙지', why: '‘익숙하지’가 줄면 ‘익숙지’가 돼요.' },
+  { re: /가르키/g, fix: '가리키 / 가르치', why: '손가락으로 방향을 나타낼 때는 ‘가리키다’, 지식을 알려 줄 때는 ‘가르치다’예요.' },
+  { re: /(할|갈|볼|될|줄)려고/g, fix: m => ({ 할: '하', 갈: '가', 볼: '보', 될: '되', 줄: '주' })[m[1]] + '려고', why: '‘-려고’ 앞에 ‘ㄹ’을 덧붙이지 않아요. (하려고)' },
+  { re: /을려고/g, fix: '으려고', why: '‘-으려고’로 써요. (먹으려고)' },
+  { re: /([가-힣])께(?=요|\s|$|[.,!?])/g, test: m => jong(m[1]) === 8, fix: m => m[1] + '게', why: '약속이나 의지를 나타낼 때는 ‘-ㄹ게’로 써요. (할게요)' },
+  { re: /(정답|답)(을|를)\s?맞추/g, fix: m => m[1] + m[2] + ' 맞히', why: '정답을 골라내는 것은 ‘맞히다’, 서로 비교하거나 짝을 맞출 때는 ‘맞추다’예요.' },
+  { re: R('내꺼|너꺼|니꺼'), pre: true, fix: m => ({ 내꺼: '내 거', 너꺼: '너 거', 니꺼: '네 거' })[m[2]], why: '‘것’을 뜻하는 ‘거’는 띄어 쓰고 ‘꺼’로 적지 않아요.' },
+  { re: /(거|뭐)에요/g, fix: m => m[1] + '예요', why: '받침이 없는 말 뒤에는 ‘-예요’를 써요. (거예요, 뭐예요)' },
+  { re: /아니예요/g, fix: '아니에요', why: '‘아니다’ 뒤에는 ‘-에요’를 써요.' },
+  { re: /([가-힣]+)던지 말던지/g, fix: m => m[1] + '든지 말든지', why: '고를 때는 ‘-든지’, 지난 일을 떠올릴 때는 ‘-던지’를 써요.' },
+
+  // 띄어쓰기
+  { kind: 'space', re: /([가-힣])(\s?)수(\s?)(있|없)/g, test: m => jong(m[1]) === 8 && (m[2] === '' || m[3] === ''), fix: m => m[1] + ' 수 ' + m[4], why: '‘수’는 앞말과 띄어 써요. (할 수 있다)' },
+  { kind: 'space', re: /([가-힣])것(?=[이은을도만과보]|\s|$|[.,!?])/g, test: (m, t) => [4, 8].includes(jong(m[1])) && !(EXC_GEOT.has(m[1]) && wordStart(t, m.index)), fix: m => m[1] + ' 것', why: '‘것’은 앞말과 띄어 써요. (먹는 것, 할 것)' },
+  { kind: 'space', re: /([가-힣])거(?=[야예에요다라]|\s|$|[.,!?])/g, test: (m, t) => [4, 8].includes(jong(m[1])) && !(EXC_GEO.has(m[1]) && wordStart(t, m.index)), fix: m => m[1] + ' 거', why: '‘것’을 뜻하는 ‘거’는 앞말과 띄어 써요. (할 거야)' },
+  { kind: 'space', re: /([가-힣])때(?=[에는도가마]|\s|$|[.,!?])/g, test: m => jong(m[1]) === 8, fix: m => m[1] + ' 때', why: '‘때’는 앞말과 띄어 써요. (할 때)' },
+  { kind: 'space', re: /([가-힣])때문/g, fix: m => m[1] + ' 때문', why: '‘때문’은 앞말과 띄어 써요. (그것 때문에)' },
+  { kind: 'space', re: /것같/g, fix: '것 같', why: '‘같다’는 앞말과 띄어 써요. (할 것 같다)' },
+  { kind: 'space', re: /고싶/g, fix: '고 싶', why: '‘싶다’는 ‘-고’ 뒤에서 띄어 써요. (하고 싶다)' },
+  { kind: 'space', re: /지않/g, fix: '지 않', why: '‘않다’는 ‘-지’ 뒤에서 띄어 써요. (하지 않다)' },
+  { kind: 'space', re: /뿐(만)?아니/g, fix: m => '뿐' + (m[1] || '') + ' 아니', why: '‘아니다’는 띄어 써요. (뿐만 아니라)' },
+  { kind: 'space', re: R('안(?:하|했|한|할|해|갔|갈|가고|가서|먹|왔|와서|봤|읽|좋|싫|보고|보면|된다|되는|되고|될|돼|되면|되지|되잖)'), pre: true, fix: m => '안 ' + m[2].slice(1), why: '‘안’은 뒤의 말을 꾸미는 말이라 띄어 써요. (안 돼, 안 했다)' },
+  { kind: 'space', re: R('(?:한|본|간|온|탄|쓴|된|먹은|읽은|들은|만난|받은|느낀|배운|겪은|해본|가본|먹어본|읽어본|들어본|써본)적(?=이|은|도|\\s?있|\\s?없)'), pre: true, fix: m => m[2].slice(0, -1) + ' 적', why: '경험을 뜻하는 ‘적’은 앞말과 띄어 써요. (가 본 적이 있다)' },
+];
+
+// 입말(구어) 표현
+const SPOKEN = [
+  { re: R('근데'), pre: true, fix: '그런데' },
+  { re: R('그치만'), pre: true, fix: '그렇지만' },
+  { re: R('암튼'), pre: true, fix: '아무튼' },
+  { re: R('걍'), pre: true, fix: '그냥' },
+  { re: R('넘(?=\\s)'), pre: true, fix: '너무' },
+  { re: R('쌤'), pre: true, fix: '선생님' },
+  { re: R('완전(?=\\s)'), pre: true, fix: '매우' },
+  { re: R('진짜(?=\\s)'), pre: true, fix: '정말' },
+  { re: /([해래와가봐써어아])(가지고|갖고)(?=\s|[,.])/g, fix: m => m[1] + '서' },
+];
+
+const afterMatch = (str, re) => { const m = str.match(re); return m ? str.slice(m.index + m[0].length) : null; };
+const NEG = /(않|못|없|아니|안|말|마라|모르|어렵|힘들|싫)/;
+
+const AGREE = [
+  {
+    title: '주어·서술어 호응',
+    test: s => {
+      const rest = afterMatch(s.core, /(이유|까닭|원인)(는|은)\s/);
+      return rest !== null && !/때문/.test(rest) &&
+        !/(이다|입니다|이에요|예요|이야|거든요|같다|같습니다|같아요|있다|있습니다|있어요|간단하다|간단합니다|분명하다|분명합니다)$/.test(s.core);
+    },
+    msg: '‘~이유는’으로 시작한 문장은 ‘~때문이다’로 끝나야 호응이 맞아요.',
+    ex: '내가 생각하는 이유는 친구가 소중하다고 생각한다. → 내가 그렇게 생각하는 이유는 친구가 소중하기 때문이다.',
+  },
+  {
+    title: '주어·서술어 호응',
+    test: s => /(점|목표|꿈|주장|바람|소망|목적|장점|단점|핵심|문제|생각|의견)(은|는)\s/.test(s.core) &&
+      !/(이유|까닭|원인)(는|은)\s/.test(s.core) && /때문(이다|입니다|이에요|이야|이죠|이지요)?$/.test(s.core),
+    msg: '‘~점은, ~생각은’으로 시작한 문장은 ‘~라는 점이다, ~것이다’로 끝나야 해요. ‘~때문이다’는 ‘이유는’과 짝을 이뤄요.',
+    ex: '내가 강조하고 싶은 점은 운동이 건강에 좋기 때문이다. → 내가 강조하고 싶은 점은 운동이 건강에 좋다는 점이다.',
+  },
+  {
+    title: '주어·서술어 호응',
+    test: s => /(꿈|목표|바람|소망|희망|목적|다짐|계획)(은|는)\s/.test(s.core) &&
+      /(싶다|싶습니다|싶어요|싶어|겠다|겠습니다|겠어요|한다|합니다|해요|된다|됩니다|돼요|할게요|할게)$/.test(s.core),
+    msg: '‘꿈은, 목표는’으로 시작한 문장은 ‘~것이다’처럼 끝나야 호응이 맞아요.',
+    ex: '나의 꿈은 멋진 요리사가 되고 싶다. → 나의 꿈은 멋진 요리사가 되는 것이다.',
+  },
+  {
+    title: '주어·서술어 호응',
+    test: s => /생각(은|는|에는)\s/.test(s.core) && /생각(한다|합니다|해요|해|했다|했습니다|했어요)$/.test(s.core),
+    msg: '‘내 생각은 ~ 생각한다’처럼 같은 말이 겹쳐 어색해요.',
+    ex: '내 생각은 급식 시간을 늘려야 한다고 생각한다. → 나는 급식 시간을 늘려야 한다고 생각한다.',
+  },
+  {
+    title: '문장 호응',
+    test: s => {
+      const rest = afterMatch(s.core, /왜냐하면|왜냐면/);
+      return rest !== null && !/(때문|거든|기에|서이다|서입니다|서예요|서요|서다|니까|으니)/.test(rest);
+    },
+    msg: '‘왜냐하면’으로 시작한 문장은 ‘~때문이다’로 끝나야 호응이 맞아요.',
+    ex: '왜냐하면 운동을 하면 스트레스가 풀린다. → 왜냐하면 운동을 하면 스트레스가 풀리기 때문이다.',
+  },
+  {
+    title: '문장 호응',
+    test: s => {
+      const rest = afterMatch(s.core, /(결코|전혀|별로|절대로|좀처럼|도무지|그다지|여간)\s/);
+      return rest !== null && !NEG.test(rest);
+    },
+    msg: '‘전혀, 결코, 별로’ 같은 말은 ‘~않다, ~없다, ~못하다’처럼 부정하는 말과 함께 써요.',
+    ex: '나는 발표가 전혀 떨렸다. → 나는 발표가 전혀 떨리지 않았다.',
+  },
+  {
+    title: '문장 호응',
+    test: s => {
+      const rest = afterMatch(s.core, /비록\s/);
+      return rest !== null && !/(지만|더라도|지라도|어도|아도|해도|여도|라도|지언정|으나|이나|는데도|은데도|ㄴ데도|나\s)/.test(rest);
+    },
+    msg: '‘비록’은 ‘~지만, ~ㄹ지라도, ~더라도’와 함께 써요.',
+    ex: '비록 시간이 부족했으므로 최선을 다했다. → 비록 시간이 부족했지만 최선을 다했다.',
+  },
+  {
+    title: '문장 호응',
+    test: s => {
+      const rest = afterMatch(s.core, /(만약|만일)\s/);
+      return rest !== null && !/(면|거든|경우|때)/.test(rest);
+    },
+    msg: '‘만약’은 ‘~라면, ~면’과 함께 써요.',
+    ex: '만약 내일 비가 오니까 소풍을 미룬다. → 만약 내일 비가 온다면 소풍을 미룬다.',
+  },
+];
+
+function computeIssues(text, sents, target) {
+  const issues = [];
+  const seen = new Set();
+  let uid = 0;
+  const add = (cat, start, end, o) => {
+    const key = cat + ':' + start + ':' + end + ':' + (o.msg || '');
+    if (start >= end || seen.has(key)) return;
+    seen.add(key);
+    issues.push(Object.assign({ id: 'i' + (uid++), cat, start, end, snippet: text.slice(start, end) }, o));
+  };
+  const tgt = target || 'handa';
+
+  for (const s of sents) {
+    if (s.isTitle) continue;
+
+    const cq = colloqInfo(s);
+    if (cq && cq.type === 'slang') {
+      add('ending', s.lwStart, s.coreEnd, {
+        title: '인터넷 말투',
+        msg: 'ㅋㅋ, ㅠㅠ 같은 표현은 글에서 쓰지 않아요. 그때의 느낌을 낱말로 표현해 보세요.',
+        ex: '너무 웃겼음 ㅋㅋㅋ → 너무 웃겨서 배가 아플 정도였다.',
+      });
+    } else if (cq) {
+      const conv = convertEnding(endingKind(s.lw), tgt);
+      add('ending', s.lwStart, s.coreEnd, {
+        title: '구어체 어미',
+        msg: '‘~했음, ~임’처럼 끝내면 메모나 인터넷 말투처럼 보여요. 문장을 끝까지 서술해 주세요.',
+        sugg: conv ? [s.lw, conv] : null,
+        ex: conv ? null : '놀이공원에 갔음. → 놀이공원에 갔다. / 놀이공원에 갔습니다.',
+      });
+    }
+
+    if (target && s.style && s.style !== target) {
+      const conv = convertEnding(endingKind(s.lw), target);
+      add('style', s.lwStart, s.coreEnd, {
+        title: '문체 통일',
+        msg: `이 문장은 ‘${STYLES[s.style].label}’로 끝났어요. 기준 문체인 ‘${STYLES[target].label}’(${STYLES[target].ex})로 맞춰 보세요.`,
+        sugg: conv ? [s.lw, conv] : null,
+      });
+    }
+
+    if (s.text.length >= LONG_LIMIT) {
+      add('long', s.start, s.end, {
+        title: '긴 문장',
+        msg: `문장이 길어 읽기 어렵습니다. 두 문장으로 나눠보세요. (공백 포함 ${s.text.length}자)`,
+        ex: '‘~하고, ~해서’로 이어진 곳에서 문장을 끊고, ‘그래서’, ‘그리고’ 같은 이어 주는 말로 다음 문장을 시작해 보세요.',
+      });
+    }
+
+    if (!s.isQuote && !/\?["'”’]*$/.test(s.text)) {
+      for (const r of AGREE) {
+        if (r.test(s)) add('agree', s.start, s.end, { title: r.title, msg: r.msg, ex: r.ex });
+      }
+    }
+  }
+
+  const scan = (rules, cat, titleOf, whyOf) => {
+    for (const r of rules) {
+      r.re.lastIndex = 0;
+      let m;
+      while ((m = r.re.exec(text))) {
+        if (m[0] === '') { r.re.lastIndex++; continue; }
+        if (r.test && !r.test(m, text)) continue;
+        const start = m.index + (r.pre ? m[1].length : 0);
+        const end = m.index + m[0].length;
+        const good = typeof r.fix === 'function' ? r.fix(m) : r.fix;
+        add(cat, start, end, { title: titleOf(r), msg: whyOf(r), sugg: [text.slice(start, end), good] });
+      }
+    }
+  };
+  scan(SPELL, 'spell', r => r.kind === 'space' ? '띄어쓰기' : '맞춤법', r => r.why);
+  scan(SPOKEN, 'ending', () => '입말 표현', () => '친구와 말할 때 쓰는 입말이에요. 글에서는 바른 글말로 바꿔 써요.');
+
+  // 문장 번호 붙이고 위치 순으로 정렬
+  issues.forEach(i => {
+    const s = sents.find(x => x.start <= i.start && i.start < x.end);
+    i.sn = s ? s.no : 0;
+  });
+  issues.sort((a, b) => a.start - b.start || CAT_ORDER.indexOf(a.cat) - CAT_ORDER.indexOf(b.cat));
+  return issues;
+}
+
+/* =========================================================
+   2단계 점검표
+   ========================================================= */
+const CLAIM_RE = /(야 한다|야 합니다|야 해요|야 된다|하자|합시다|필요하다|필요합니다|필요해요|바란다|바랍니다|좋겠다|좋겠습니다|반대한다|반대합니다|찬성한다|찬성합니다|주장한다|주장합니다|말아야|되어서는 안|돼서는 안|지 말자|지 맙시다|바람직하다|바람직합니다)/;
+const DEF_RE = /(이란|란\s|라는 것은|라고 한다|라고 합니다|라고 해요|[을를] 말한다|[을를] 말합니다|[을를] 뜻한다|[을를] 뜻합니다|[을를] 의미한다|[을를] 의미합니다|라고 부른다|라고 부릅니다)/;
+const SUBJ_RE = /(나는|내가|제가|저는|생각한다|생각합니다|생각해요|느꼈|느낀다|것 같다|것 같습니다|것 같아요|좋겠|싶다|싶습니다|싶어요|너무|정말|진짜|최고|대단)/;
+const EMO_RE = /(고맙|고마웠|고마운|감사|미안|죄송|사랑|기뻤|기쁘|기쁜|슬펐|슬프|슬픈|속상|서운|행복|뿌듯|부끄|걱정|설레|설렜|화가|화났|섭섭|그립|그리웠|감동|놀랐|아쉬|후회|존경|든든|외로|무서|두려|창피|억울|반가|벅차|마음이 놓)/g;
+const METHODS = [
+  ['정의', DEF_RE],
+  ['예시', /(예를 들어|예를 들면|예컨대|대표적인|대표적으로|등이 있|등을 들 수)/],
+  ['비교·대조', /(비교|반면|달리|차이|공통점|마찬가지|비슷)/],
+  ['분류·구분', /(나눌 수|나뉜다|나뉩니다|나누어|종류|분류|구분)/],
+  ['분석', /(구성|이루어|부분으로|요소)/],
+  ['인과', /(때문에|그 결과|원인|결과적으로)/],
+  ['과정', /(먼저|다음으로|그다음|그 다음|마지막으로|순서|단계|과정)/],
+];
+
+const paraItem = (label, guide) => ({
+  label,
+  desc: '부분이 바뀌는 곳에서 문단을 나누면 글의 짜임이 한눈에 보여요.',
+  custom: ctx => ({ ok: ctx.paraCount >= 3, note: `지금 문단 수: ${ctx.paraCount}개` }),
+  guide,
+});
+
+const CHECKLISTS = {
+  argue: {
+    label: '주장하는 글',
+    parts: '서론–본론–결론',
+    sections: [
+      { name: '서론', items: [
+        { label: '문제 상황을 제시했나요?', sec: 'intro',
+          re: /(문제|요즘|최근|현상|늘어|늘고|증가|줄어|감소|심각|걱정|우려|논란|사례|조사|통계|\d+\s?(%|퍼센트)|고 있다|고 있습니다|고 있어요|고 있음)/,
+          desc: '왜 이 문제를 생각해야 하는지, 요즘의 상황이나 문제를 먼저 보여 줘요.',
+          guide: '서론 첫 부분에 요즘 일어나는 문제 상황을 한두 문장으로 써 보세요.',
+          ex: '요즘 쉬는 시간마다 휴대폰만 보는 학생이 늘고 있다.' },
+        { label: '나의 주장이 분명하게 드러나나요?', sec: 'all', re: CLAIM_RE,
+          desc: '무엇을 주장하는지 한 문장으로 분명하게 밝혀요.',
+          guide: '‘~해야 한다’, ‘~하자’로 끝나는 주장 문장을 서론 끝에 써 보세요.',
+          ex: '우리는 휴대폰 사용 시간을 스스로 정해야 한다.' },
+      ] },
+      { name: '본론', items: [
+        { label: '근거를 두 가지 이상 들었나요?',
+          desc: '주장이 옳다는 것을 보여 주는 까닭(근거)을 두 가지 이상 써요.',
+          custom: ctx => {
+            const ord = ctx.body.filter(s => /(첫째|첫 번째|둘째|두 번째|셋째|세 번째|우선|다음으로|또한|게다가|뿐만 아니라|마지막으로)/.test(s.text));
+            const why = ctx.body.filter(s => /(때문|왜냐하면|이유|근거)/.test(s.text));
+            const ev = [...new Set([...ord, ...why])].sort((a, b) => a.start - b.start);
+            const n = Math.max(ord.length, why.length);
+            return { ok: n >= 2, ev: ev.slice(0, 3), note: `근거로 보이는 문장: ${ev.length}개` };
+          },
+          guide: '‘첫째, ~ 때문이다. 둘째, ~ 때문이다.’처럼 근거를 나누어 한 문단씩 써 보세요.',
+          ex: '첫째, 휴대폰을 오래 보면 수업에 집중하기 어렵기 때문이다.' },
+        { label: '근거를 뒷받침하는 예시나 자료가 있나요?', sec: 'body',
+          re: /(예를 들어|예를 들면|예컨대|실제로|조사|연구|통계|따르면|\d+\s?(%|퍼센트|명|시간|분)|경험|사례)/,
+          desc: '조사 결과, 수치, 실제 사례, 경험을 넣으면 근거가 더 믿음직해져요.',
+          guide: '근거마다 ‘예를 들어 ~’, ‘~ 조사에 따르면 ~’처럼 구체적인 예나 자료를 붙여 보세요.',
+          ex: '한 조사에 따르면 청소년의 하루 평균 스마트폰 사용 시간은 4시간이 넘는다.' },
+      ] },
+      { name: '결론', items: [
+        { label: '본론의 내용을 요약했나요?', sec: 'concl',
+          re: /(따라서|그러므로|결론적으로|이처럼|이와 같이|지금까지|요약하면|정리하면|이렇듯|이상에서)/,
+          desc: '결론에서는 앞에서 말한 근거를 짧게 정리해요.',
+          guide: '결론 첫 문장을 ‘이처럼’, ‘따라서’로 시작해 근거를 한 문장으로 모아 보세요.',
+          ex: '이처럼 휴대폰을 오래 사용하면 공부와 잠에 모두 나쁜 영향을 준다.' },
+        { label: '주장을 강조하거나 당부했나요?', sec: 'concl',
+          re: /(합시다|맙시다|하자|보자|말자|바란다|바랍니다|야 한다|야 합니다|야 해요|부탁|노력|좋겠|기를|길 바|자[.!]*$)/,
+          desc: '마지막에 독자에게 바라는 점을 밝히면 글이 힘 있게 끝나요.',
+          guide: '‘~합시다’, ‘~하기를 바란다’처럼 독자에게 당부하는 문장으로 끝내 보세요.',
+          ex: '오늘부터 휴대폰 사용 시간을 스스로 정해 지켜 보자.' },
+      ] },
+      { name: '전체', items: [
+        paraItem('서론–본론–결론으로 문단을 나누었나요?', '서론, 근거 하나하나, 결론이 바뀌는 곳에서 줄을 바꾸고 한 줄을 띄어 문단을 나눠 보세요.'),
+      ] },
+    ],
+  },
+  explain: {
+    label: '설명하는 글',
+    parts: '처음–중간–끝',
+    sections: [
+      { name: '처음', items: [
+        { label: '설명할 대상을 소개했나요?', sec: 'intro',
+          re: /(알아보|소개|설명하|무엇일까|무엇인가|무엇인지|궁금|에 대해|에 대하여|살펴보|이란|란\s)/,
+          desc: '무엇을 설명하는 글인지 처음에 밝히고, 읽는 사람의 관심을 끌어요.',
+          guide: '‘~에 대해 알아보자.’, ‘~은 무엇일까?’처럼 설명 대상을 소개하는 문장을 써 보세요.',
+          ex: '우리 몸을 지키는 백혈구는 어떤 일을 할까?' },
+        { label: '설명 대상의 뜻(정의)을 밝혔나요?', sec: 'all', re: DEF_RE,
+          desc: '‘~란 ~이다’처럼 대상이 무엇인지 뜻을 풀어 줘요.',
+          guide: '‘○○이란 ~을 말한다.’ 형식으로 뜻을 한 문장으로 써 보세요.',
+          ex: '백혈구란 혈액 속에서 세균과 싸우는 세포를 말한다.' },
+      ] },
+      { name: '중간', items: [
+        { label: '설명 방법을 두 가지 이상 활용했나요?',
+          desc: '정의, 예시, 비교·대조, 분류, 분석, 인과, 과정 같은 설명 방법을 쓰면 내용이 쉬워져요.',
+          custom: ctx => {
+            const found = [], ev = [];
+            METHODS.forEach(([name, re]) => {
+              const s = ctx.all.find(x => re.test(x.text));
+              if (s) { found.push(name); if (!ev.includes(s)) ev.push(s); }
+            });
+            return { ok: found.length >= 2, ev: ev.slice(0, 3), note: found.length ? `찾은 설명 방법: ${found.join(', ')}` : '설명 방법을 나타내는 말을 찾지 못했어요.' };
+          },
+          guide: '예를 들거나(예시), 다른 것과 견주거나(비교·대조), 종류를 나누어(분류) 설명을 더해 보세요.',
+          ex: '백혈구는 적혈구와 달리 핵이 있다. (대조)' },
+        { label: '객관적인 사실을 중심으로 썼나요?',
+          desc: '설명하는 글은 내 느낌보다 사실을 정확하게 전달해요.',
+          custom: ctx => {
+            const subj = ctx.all.filter(s => SUBJ_RE.test(s.text));
+            return { ok: subj.length === 0, ev: subj.slice(0, 3), note: subj.length ? `느낌이나 생각이 드러난 문장이 ${subj.length}개 있어요. 아래 문장을 살펴보세요.` : '느낌이나 생각을 나타내는 표현이 보이지 않아요.' };
+          },
+          guide: '‘나는 ~라고 생각한다’, ‘정말 대단한 것 같다’ 같은 느낌 표현은 사실을 전하는 문장으로 바꾸거나 빼 보세요.',
+          ex: '백혈구는 정말 대단한 것 같다. → 백혈구는 하루에도 수많은 세균을 없앤다.' },
+        { label: '정확한 정보(수치·자료)를 활용했나요?', sec: 'all',
+          re: /(\d|따르면|조사|연구|자료|사전|통계|과학자|전문가|학자)/,
+          desc: '숫자나 조사 결과처럼 정확한 정보가 있으면 설명을 믿을 수 있어요.',
+          guide: '숫자, 조사 결과, 책이나 사전에서 찾은 내용을 넣어 정보를 정확하게 만들어 보세요.',
+          ex: '건강한 사람의 혈액 1마이크로리터에는 약 4천에서 1만 개의 백혈구가 있다.' },
+      ] },
+      { name: '끝', items: [
+        { label: '설명한 내용을 정리했나요?', sec: 'concl',
+          re: /(이처럼|이와 같이|지금까지|정리하면|요약하면|알아보았|살펴보았|알아봤|살펴봤|따라서|이렇듯)/,
+          desc: '끝에서는 중간에서 설명한 내용을 간추려 정리해요.',
+          guide: '‘이처럼 ~’으로 시작해 중간에서 설명한 내용을 한두 문장으로 정리해 보세요.',
+          ex: '이처럼 백혈구는 여러 종류가 힘을 모아 우리 몸을 지킨다.' },
+      ] },
+      { name: '전체', items: [
+        paraItem('처음–중간–끝으로 문단을 나누었나요?', '대상 소개(처음), 설명 내용(중간), 정리(끝)가 바뀌는 곳에서 문단을 나눠 보세요.'),
+      ] },
+    ],
+  },
+  heart: {
+    label: '마음을 전하는 글',
+    parts: '처음–중간–끝',
+    sections: [
+      { name: '처음', items: [
+        { label: '마음을 전할 대상이 드러나나요?', sec: 'full',
+          re: /(에게|께|한테|님|선생님|엄마|아빠|어머니|아버지|부모님|친구|형|누나|언니|오빠|동생|할머니|할아버지)/,
+          desc: '누구에게 마음을 전하는지 분명하게 밝혀요.',
+          guide: '첫머리에 ‘○○에게’, ‘○○께’처럼 대상을 부르며 시작해 보세요.',
+          ex: '사랑하는 할머니께' },
+        { label: '마음을 전하게 된 계기(겪은 일)가 있나요?',
+          desc: '어떤 일이 있었기에 이 마음을 전하는지 겪은 일을 써요.',
+          custom: ctx => {
+            const ev = ctx.all.filter(s => /([었았였했웠렸났갔왔봤셨](다|어요|습니다|어|지|는데|고|을 때|던)|그날|어느 날|지난|작년|어제|그때)/.test(s.text));
+            return { ok: ev.length >= 2, ev: ev.slice(0, 2), note: `겪은 일을 나타낸 문장: ${ev.length}개` };
+          },
+          guide: '언제, 어디서, 무슨 일이 있었는지 겪은 일을 차례대로 써 보세요.',
+          ex: '지난여름 할머니 댁에서 밤새 열이 났을 때, 할머니께서 곁을 지켜 주셨다.' },
+      ] },
+      { name: '중간', items: [
+        { label: '그때의 감정을 솔직하게 표현했나요?',
+          desc: '고마움, 미안함, 기쁨처럼 그때 느낀 마음을 솔직하게 써요.',
+          custom: ctx => {
+            const words = new Set();
+            const ev = ctx.all.filter(s => { const m = s.text.match(EMO_RE); if (m) m.forEach(w => words.add(w)); return !!m; });
+            return { ok: ev.length > 0, ev: ev.slice(0, 2), note: words.size ? `찾은 감정 표현: ${[...words].join(', ')}` : '감정을 나타내는 말을 찾지 못했어요.' };
+          },
+          guide: '‘고마웠다’, ‘미안했다’처럼 그때의 마음을 나타내는 말을 넣고, 왜 그런 마음이 들었는지도 써 보세요.',
+          ex: '아픈 나를 위해 한숨도 못 주무신 할머니를 보니 죄송하고 고마웠다.' },
+        { label: '구체적인 장면이나 말이 드러나나요?', sec: 'all',
+          re: /(그때|그 순간|그날|말씀|말했|말하|웃으|웃었|울었|눈물|손을|["“”‘’])/,
+          desc: '그때 들은 말, 표정, 행동이 드러나면 마음이 더 잘 전해져요.',
+          guide: '그때 들은 말, 표정, 행동을 떠올려 한 장면을 그리듯 써 보세요.',
+          ex: '할머니께서는 “괜찮다, 금방 나을 거야.” 하시며 이마를 짚어 주셨다.' },
+      ] },
+      { name: '끝', items: [
+        { label: '깨달음이나 다짐이 있나요?', sec: 'all',
+          re: /(깨달|알게 되|알게 됐|배웠|생각하게 되|다짐|앞으로|이제는|이제부터|노력하겠|하겠다|하겠습니다|할게|겠어|소중함|소중하다는|소중한지)/,
+          desc: '그 일로 새롭게 알게 된 점이나 앞으로의 다짐을 써요.',
+          guide: '‘그 일로 ~을 깨달았다’, ‘앞으로는 ~하겠다’처럼 생각이 어떻게 달라졌는지 써 보세요.',
+          ex: '그날 이후 가족의 사랑이 얼마나 소중한지 알게 되었다.' },
+      ] },
+      { name: '전체', items: [
+        paraItem('처음–중간–끝으로 문단을 나누었나요?', '겪은 일(처음), 그때의 마음(중간), 깨달음·다짐(끝)이 바뀌는 곳에서 문단을 나눠 보세요.'),
+      ] },
+    ],
+  },
+};
+
+// 문단 나누기: 빈 줄이 있으면 빈 줄 기준, 없으면 줄 바꿈 기준
+function getParagraphs(text, sents) {
+  const paras = [];
+  const blank = /\n[ \t]*\n/.test(text);
+  let pos = 0, cur = null;
+  for (const line of text.split('\n')) {
+    const s = pos, e = pos + line.length;
+    pos = e + 1;
+    if (!line.trim()) { cur = null; continue; }
+    if (blank && cur) cur.end = e;
+    else { cur = { start: s, end: e }; paras.push(cur); }
+  }
+  const t = sents.find(s => s.isTitle);
+  if (!t) return paras;
+  return paras.filter(p => !(p.start <= t.start && t.end <= p.end && text.slice(p.start, p.end).trim() === t.text));
+}
+
+function buildContext(text) {
+  const sents = analyzeSentences(text);
+  const all = sents.filter(s => !s.isTitle);
+  const paras = getParagraphs(text, sents);
+  const byPara = paras.length >= 3;
+  const inPara = (s, p) => s.start >= p.start && s.start < p.end;
+  let intro, body, concl;
+  if (byPara) {
+    intro = all.filter(s => inPara(s, paras[0]));
+    concl = all.filter(s => inPara(s, paras[paras.length - 1]));
+    body = all.filter(s => !intro.includes(s) && !concl.includes(s));
+  } else if (all.length < 3) {
+    intro = body = concl = all;
+  } else {
+    const k = Math.max(1, Math.round(all.length * 0.25));
+    intro = all.slice(0, k);
+    concl = all.slice(all.length - k);
+    body = all.slice(k, all.length - k);
+  }
+  return { text, full: sents, all, intro, body, concl, paraCount: paras.length, byPara };
+}
+
+function evalItem(it, ctx) {
+  if (it.custom) return it.custom(ctx);
+  const found = ctx[it.sec].filter(s => it.re.test(s.text));
+  return { ok: found.length > 0, ev: found.slice(0, 2) };
+}
+
+/* =========================================================
+   화면
+   ========================================================= */
+const $ = s => document.querySelector(s);
+let editor;
+const state = {
+  s1: null,                // { text, sents, counts, opts, style, issues }
+  filters: new Set(CAT_ORDER),
+  done: new Set(),
+  s2: null,                // { text, genre, ctx, results, checked }
+  ev: [],
+};
+
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+function updateStats() {
+  const text = editor.value;
+  const sents = text.trim() ? analyzeSentences(text) : [];
+  const paras = text.trim() ? getParagraphs(text, sents) : [];
+  $('#stats').innerHTML = `공백 포함 <b>${text.length}</b>자 · 문장 <b>${sents.filter(s => !s.isTitle).length}</b>개 · 문단 <b>${paras.length}</b>개`;
+  $('#stale1').hidden = !(state.s1 && state.s1.text !== text);
+  $('#stale2').hidden = !(state.s2 && state.s2.text !== text);
+}
+
+function showTab(n) {
+  [1, 2].forEach(k => {
+    $('#tab' + k).setAttribute('aria-selected', String(k === n));
+    $('#panel' + k).hidden = k !== n;
+  });
+}
+
+/* ---------- 편집창의 특정 위치로 이동 ---------- */
+function scrollEditorTo(pos) {
+  const cs = getComputedStyle(editor);
+  const m = $('#mirror');
+  ['fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'letterSpacing', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft', 'wordBreak', 'tabSize'].forEach(p => { m.style[p] = cs[p]; });
+  m.style.boxSizing = 'border-box';
+  m.style.width = editor.clientWidth + 'px';
+  m.textContent = editor.value.slice(0, pos);
+  const mark = document.createElement('span');
+  mark.textContent = '​';
+  m.appendChild(mark);
+  editor.scrollTop = Math.max(0, mark.offsetTop - editor.clientHeight / 3);
+  m.textContent = '';
+}
+
+function locate(start, snippet) {
+  const t = editor.value;
+  let pos = -1;
+  if (t.substr(start, snippet.length) === snippet) pos = start;
+  else {
+    let best = Infinity;
+    for (let i = t.indexOf(snippet); i !== -1; i = t.indexOf(snippet, i + 1)) {
+      if (Math.abs(i - start) < best) { best = Math.abs(i - start); pos = i; }
+    }
+  }
+  if (pos < 0) { toast('글이 바뀌어서 그 부분을 찾지 못했어요. 다시 점검해 보세요.'); return; }
+  if (window.matchMedia('(max-width: 899px)').matches) editor.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  editor.focus({ preventScroll: true });
+  editor.setSelectionRange(pos, pos + snippet.length);
+  scrollEditorTo(pos);
+}
+
+/* ---------- 1단계 ---------- */
+function runStage1() {
+  const text = editor.value;
+  if (!text.trim()) { toast('먼저 왼쪽에 글을 입력해 주세요.'); editor.focus(); return; }
+  const sents = analyzeSentences(text);
+  const counts = {};
+  sents.forEach(s => { s.style = classifyStyle(s); if (s.style) counts[s.style] = (counts[s.style] || 0) + 1; });
+  const opts = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+  let style = state.s1 && state.s1.style;
+  if (!opts.includes(style)) style = opts[0] || null;
+  state.s1 = { text, sents, counts, opts, style, issues: computeIssues(text, sents, style) };
+  state.done.clear();
+  renderStage1();
+  updateStats();
+  $('#panel1').scrollTop = 0;
+}
+
+function previewHTML(text, issues) {
+  const vis = issues.filter(i => state.filters.has(i.cat));
+  const pts = new Set([0, text.length]);
+  vis.forEach(i => { pts.add(i.start); pts.add(i.end); });
+  const arr = [...pts].sort((a, b) => a - b);
+  let out = '';
+  for (let k = 0; k < arr.length - 1; k++) {
+    const a = arr[k], b = arr[k + 1];
+    const seg = esc(text.slice(a, b));
+    const cov = vis.filter(i => i.start <= a && i.end >= b);
+    if (!cov.length) { out += seg; continue; }
+    const cls = [];
+    const word = cov.find(i => !SENT_CATS.has(i.cat));
+    if (word) cls.push('hl-' + word.cat);
+    new Set(cov.filter(i => SENT_CATS.has(i.cat)).map(i => i.cat)).forEach(c => cls.push('u-' + c));
+    const ids = cov.slice().sort((x, y) => SENT_CATS.has(x.cat) - SENT_CATS.has(y.cat)).map(i => i.id).join(' ');
+    out += `<span class="${cls.join(' ')}" data-ids="${ids}">${seg}</span>`;
+  }
+  return out;
+}
+
+function cardHTML(i) {
+  const t = state.s1.text;
+  let quote;
+  if (SENT_CATS.has(i.cat)) {
+    quote = esc(i.snippet.length > 90 ? i.snippet.slice(0, 88) + '…' : i.snippet);
+  } else {
+    const a = Math.max(0, i.start - 16), b = Math.min(t.length, i.end + 12);
+    quote = (a > 0 ? '…' : '') + esc(t.slice(a, i.start).replace(/\n/g, ' ')) +
+      '<mark>' + esc(i.snippet) + '</mark>' +
+      esc(t.slice(i.end, b).replace(/\n/g, ' ')) + (b < t.length ? '…' : '');
+  }
+  const done = state.done.has(i.id);
+  return `<li class="card c-${i.cat}${done ? ' done' : ''}" id="card-${i.id}">
+    <div class="card-head"><span class="badge">${esc(i.title)}</span><span class="where">${i.sn ? i.sn + '번째 문장' : '제목'}</span></div>
+    <blockquote>${quote}</blockquote>
+    <p class="msg">${esc(i.msg)}</p>
+    ${i.sugg ? `<p class="sugg">✏️ 이렇게 바꿔 볼까요? <s>${esc(i.sugg[0])}</s> → <b>${esc(i.sugg[1])}</b></p>` : ''}
+    ${i.ex ? `<p class="ex"><span>예</span>${esc(i.ex)}</p>` : ''}
+    <div class="card-actions">
+      <button type="button" class="btn small" data-locate="${i.id}">편집창에서 찾기</button>
+      <label class="done-check"><input type="checkbox" data-done="${i.id}"${done ? ' checked' : ''}> 고쳤어요</label>
+    </div>
+  </li>`;
+}
+
+function renderStage1() {
+  const r = state.s1;
+  const cnt = {};
+  CAT_ORDER.forEach(k => { cnt[k] = 0; });
+  r.issues.forEach(i => cnt[i.cat]++);
+
+  let html = '<section class="style-box"><h3>기준 문체 고르기</h3>';
+  if (!r.opts.length) {
+    html += '<p class="muted">문체를 알아볼 수 있는 문장이 아직 없어요.</p>';
+  } else {
+    html += r.opts.length === 1
+      ? `<p class="muted">이 글은 <b>${STYLES[r.opts[0]].label}</b>로 통일되어 있어요. 잘했어요! 👍</p>`
+      : `<p class="muted">이 글에는 문체가 <b>${r.opts.length}가지</b> 섞여 있어요. 글 전체를 어떤 문체로 맞출지 골라 보세요.</p>`;
+    html += '<div class="style-opts" role="radiogroup" aria-label="기준 문체">' + r.opts.map(k =>
+      `<label class="style-opt${k === r.style ? ' on' : ''}"><input type="radio" name="style" value="${k}"${k === r.style ? ' checked' : ''}>` +
+      `<span class="so-name">${STYLES[k].label}<em>${r.counts[k]}문장</em></span><span class="so-ex">${STYLES[k].ex}</span></label>`
+    ).join('') + '</div>';
+  }
+  html += '</section>';
+
+  if (!r.issues.length) {
+    html += '<div class="empty good"><b>고칠 곳을 찾지 못했어요. 👏</b><p>자동 점검이 모든 실수를 찾지는 못해요.<br>소리 내어 한 번 더 읽어 본 뒤 2단계로 넘어가세요.</p></div>';
+  } else {
+    html += `<p class="summary">살펴볼 곳이 <b>${r.issues.length}</b>군데 있어요. 색깔 표시를 누르면 설명 카드로 이동해요.</p>`;
+    html += '<div class="chips">' + CAT_ORDER.map(k =>
+      `<button type="button" class="chip c-${k}${state.filters.has(k) ? ' on' : ''}" data-filter="${k}" aria-pressed="${state.filters.has(k)}"${cnt[k] ? '' : ' disabled'}><i></i>${CATS[k].label} <b>${cnt[k]}</b></button>`
+    ).join('') + '</div>';
+    html += `<div class="preview" id="preview">${previewHTML(r.text, r.issues)}</div>`;
+    html += `<ol class="cards">${r.issues.filter(i => state.filters.has(i.cat)).map(cardHTML).join('')}</ol>`;
+  }
+  html += '<div class="next"><button type="button" class="btn" data-goto="2">2단계: 구조·내용 점검으로 →</button></div>';
+  $('#result1').innerHTML = html;
+}
+
+/* ---------- 2단계 ---------- */
+function runStage2() {
+  const text = editor.value;
+  const genre = $('#genre').value;
+  if (!text.trim()) { toast('먼저 왼쪽에 글을 입력해 주세요.'); editor.focus(); return; }
+  if (!genre) {
+    toast('위에서 글 유형을 먼저 골라 주세요.');
+    const g = $('#genre');
+    g.focus();
+    g.classList.add('attn');
+    setTimeout(() => g.classList.remove('attn'), 1600);
+    return;
+  }
+  const ctx = buildContext(text);
+  const results = CHECKLISTS[genre].sections.map(sec => ({
+    name: sec.name,
+    items: sec.items.map(it => ({ it, res: evalItem(it, ctx) })),
+  }));
+  state.s2 = { text, genre, ctx, results, checked: new Set() };
+  renderStage2();
+  updateStats();
+  $('#panel2').scrollTop = 0;
+}
+
+function progressOf() {
+  const total = state.s2.results.reduce((n, s) => n + s.items.length, 0);
+  return { done: state.s2.checked.size, total };
+}
+
+function renderStage2() {
+  const r = state.s2;
+  const cl = CHECKLISTS[r.genre];
+  const p = progressOf();
+  state.ev = [];
+  let n = 0;
+  let html = `<div class="s2-head"><h3>${cl.label} 점검표</h3>
+    <div class="progress"><span id="prog"><b>${p.done}</b> / ${p.total} 확인</span><div class="bar"><i id="progbar" style="width:${p.done / p.total * 100}%"></i></div></div></div>
+    <p class="note">✅/🔎 표시는 글 속 낱말을 보고 짐작한 결과예요. 내 글을 다시 읽고, 그 내용이 들어 있으면 직접 체크하세요.</p>`;
+  if (!r.ctx.byPara) {
+    html += `<p class="para-note">📌 문단이 ${r.ctx.paraCount}개라서 문장 순서로 ${cl.parts}을 짐작했어요. 문단을 나누면 더 정확하게 점검할 수 있어요.</p>`;
+  }
+  r.results.forEach(sec => {
+    html += `<section class="s2-sec"><h4>${sec.name}</h4><ul class="checks">`;
+    sec.items.forEach(({ it, res }) => {
+      const id = 'ck' + (n++);
+      const on = r.checked.has(id);
+      const ev = (res.ev || []).map(s => {
+        state.ev.push(s);
+        const tx = s.text.length > 70 ? s.text.slice(0, 68) + '…' : s.text;
+        return `<button type="button" class="quote" data-ev="${state.ev.length - 1}" title="편집창에서 찾기">“${esc(tx)}”</button>`;
+      }).join('');
+      html += `<li class="ck ${res.ok ? 'ok' : 'check'}${on ? ' checked' : ''}">
+        <div class="ck-top">
+          <label><input type="checkbox" data-ck="${id}"${on ? ' checked' : ''}><span>${esc(it.label)}</span></label>
+          <span class="auto">${res.ok ? '✅ 글에서 찾았어요' : '🔎 잘 보이지 않아요'}</span>
+        </div>
+        <p class="ck-desc">${esc(it.desc)}</p>
+        ${res.note ? `<p class="ck-note">${esc(res.note)}</p>` : ''}
+        ${ev ? `<div class="evidence">${ev}</div>` : ''}
+        <details${res.ok ? '' : ' open'}><summary>이렇게 고쳐 보세요</summary><p>${esc(it.guide)}</p>${it.ex ? `<p class="ex"><span>예</span>${esc(it.ex)}</p>` : ''}</details>
+      </li>`;
+    });
+    html += '</ul></section>';
+  });
+  html += `<div class="finish" id="finish"${p.done === p.total ? '' : ' hidden'}>🎉 모든 항목을 확인했어요! 마지막으로 글을 처음부터 끝까지 소리 내어 읽으며 퇴고를 마무리하세요.</div>`;
+  $('#result2').innerHTML = html;
+}
+
+/* ---------- 예시 글 ---------- */
+const SAMPLES = {
+  argue: `휴대폰 사용 시간을 스스로 정하자
+
+요즘 쉬는 시간마다 휴대폰만 보는 학생들이 많아지고 있음. 한 조사에 따르면 청소년의 하루 평균 스마트폰 사용 시간은 4시간이 넘는다고 한다. 나는 우리가 휴대폰 사용 시간을 스스로 정해야 한다고 주장합니다.
+
+첫째, 휴대폰을 오래 사용하면 공부에 집중할수없다. 내가 강조하고 싶은 점은 짧은 영상을 계속 보면 집중력이 떨어지기 때문이다.
+
+둘째, 잠들기 전에 휴대폰을 보면 잠을 푹 자지 못해서 다음 날 수업 시간에 졸게 되고 결국 학교생활 전체에 나쁜 영향을 주게 된다. 내 생각은 잠이 부족하면 건강도 나빠진다고 생각한다.
+
+따라서 우리는 휴대폰 사용 시간을 스스로 정하고 지켜야 한다. 몇일만 노력해도 금새 습관이 되요. 오늘부터 함께 실천해 보자.`,
+  explain: `우리 몸의 방패, 백혈구
+
+백혈구란 혈액 속에 있는 세포로, 몸에 들어온 세균이나 바이러스와 싸우는 역활을 한다. 백혈구에는 어떤 종류가 있고 각각 어떤 일을 하는지 알아보자.
+
+백혈구는 크게 과립구, 림프구, 단핵구로 나눌 수 있다. 과립구는 몸에 들어온 세균을 직접 잡아먹는다. 림프구는 한 번 들어온 병균을 기억했다가 다시 들어오면 빠르게 공격합니다. 백혈구는 적혈구와 달리 모양이 일정하지 않고 핵이 있다. 건강한 사람의 혈액 1마이크로리터에는 약 4천에서 1만 개의 백혈구가 있다.
+
+나는 백혈구가 정말 대단한 것 같다. 이처럼 백혈구는 여러 종류가 힘을 모아 우리 몸을 지킨다.`,
+  heart: `할머니께
+
+할머니, 저 민서예요.
+지난여름 방학 때 할머니 댁에 놀러 갔다가 제가 밤새 열이 나서 많이 아팠어요. 할머니께서는 한숨도 주무시지 않고 제 옆에서 물수건을 계속 갈아 주셨어요.
+할머니께서 "괜찮다, 금방 나을 거야." 하시며 이마를 짚어 주셨을 때 정말 마음이 놓였어요.
+그때는 너무 아파서 고맙다는 말도 제대로 못 했음.
+그날 이후 가족의 사랑이 얼마나 소중한지 알게 되었다. 이번 방학에는 제가 할머니 어깨를 주물러 드릴께요.
+할머니, 늘 건강하세요. 사랑해요!
+
+손녀 민서 올림`,
+};
+
+/* ---------- 이벤트 ---------- */
+function init() {
+  editor = $('#editor');
+  updateStats();
+
+  editor.addEventListener('input', updateStats);
+  $('#tab1').addEventListener('click', () => showTab(1));
+  $('#tab2').addEventListener('click', () => showTab(2));
+  $('#btnStage1').addEventListener('click', runStage1);
+  $('#btnStage2').addEventListener('click', runStage2);
+  document.querySelectorAll('[data-rerun]').forEach(b => b.addEventListener('click', () => (b.dataset.rerun === '1' ? runStage1 : runStage2)()));
+
+  $('#genre').addEventListener('change', e => {
+    const v = e.target.value;
+    $('#hint2').textContent = v ? `‘${CHECKLISTS[v].label}’ 점검표로 살펴봐요.` : '위에서 글 유형을 먼저 골라 주세요.';
+    if (state.s2 && v) runStage2();
+  });
+
+  $('#btnSample').addEventListener('click', () => {
+    if (editor.value.trim() && !confirm('지금 쓴 글을 지우고 예시 글을 넣을까요?')) return;
+    const g = $('#genre').value || 'argue';
+    $('#genre').value = g;
+    $('#genre').dispatchEvent(new Event('change'));
+    editor.value = SAMPLES[g];
+    updateStats();
+    toast(`‘${CHECKLISTS[g].label}’ 예시 글을 넣었어요. [1단계 점검]을 눌러 보세요.`);
+  });
+
+  $('#btnCopy').addEventListener('click', async () => {
+    if (!editor.value.trim()) { toast('복사할 글이 없어요.'); return; }
+    try {
+      await navigator.clipboard.writeText(editor.value);
+    } catch (err) {
+      editor.focus();
+      editor.select();
+      document.execCommand('copy');
+    }
+    toast('글을 복사했어요. 원하는 곳에 붙여 넣으세요.');
+  });
+
+  $('#btnClear').addEventListener('click', () => {
+    if (!editor.value.trim()) return;
+    if (!confirm('글을 모두 지울까요? 저장되지 않으므로 되돌릴 수 없어요.')) return;
+    editor.value = '';
+    state.s1 = state.s2 = null;
+    $('#result1').innerHTML = '<div class="empty"><b>왼쪽에 글을 입력하고 [1단계 점검]을 눌러 보세요.</b></div>';
+    $('#result2').innerHTML = '<div class="empty"><b>글 유형을 고르고 [2단계 점검]을 눌러 보세요.</b></div>';
+    updateStats();
+    editor.focus();
+  });
+
+  // 1단계 결과 영역
+  const r1 = $('#result1');
+  r1.addEventListener('click', e => {
+    const f = e.target.closest('[data-filter]');
+    if (f) {
+      const k = f.dataset.filter;
+      state.filters.has(k) ? state.filters.delete(k) : state.filters.add(k);
+      renderStage1();
+      return;
+    }
+    const loc = e.target.closest('[data-locate]');
+    if (loc) {
+      const i = state.s1.issues.find(x => x.id === loc.dataset.locate);
+      if (i) locate(i.start, i.snippet);
+      return;
+    }
+    const go = e.target.closest('[data-goto]');
+    if (go) { showTab(2); if (!$('#genre').value) $('#genre').focus(); return; }
+    const hl = e.target.closest('[data-ids]');
+    if (hl) {
+      const id = hl.dataset.ids.split(' ').find(x => document.getElementById('card-' + x));
+      const card = id && document.getElementById('card-' + id);
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.classList.add('flash');
+        setTimeout(() => card.classList.remove('flash'), 1200);
+      }
+    }
+  });
+  r1.addEventListener('change', e => {
+    if (e.target.name === 'style') {
+      const r = state.s1;
+      r.style = e.target.value;
+      r.issues = computeIssues(r.text, r.sents, r.style);
+      state.done.clear();
+      renderStage1();
+    } else if (e.target.dataset.done) {
+      const id = e.target.dataset.done;
+      e.target.checked ? state.done.add(id) : state.done.delete(id);
+      document.getElementById('card-' + id).classList.toggle('done', e.target.checked);
+    }
+  });
+
+  // 2단계 결과 영역
+  const r2 = $('#result2');
+  r2.addEventListener('click', e => {
+    const q = e.target.closest('[data-ev]');
+    if (q) { const s = state.ev[+q.dataset.ev]; if (s) locate(s.start, s.text); }
+  });
+  r2.addEventListener('change', e => {
+    const id = e.target.dataset.ck;
+    if (!id) return;
+    e.target.checked ? state.s2.checked.add(id) : state.s2.checked.delete(id);
+    e.target.closest('.ck').classList.toggle('checked', e.target.checked);
+    const p = progressOf();
+    $('#prog').innerHTML = `<b>${p.done}</b> / ${p.total} 확인`;
+    $('#progbar').style.width = (p.done / p.total * 100) + '%';
+    $('#finish').hidden = p.done !== p.total;
+  });
+
+  // 자동 저장하지 않으므로 창을 닫기 전에 알림
+  window.addEventListener('beforeunload', e => {
+    if (editor.value.trim()) { e.preventDefault(); e.returnValue = ''; }
+  });
+}
+
+if (typeof document !== 'undefined' && document.getElementById('editor')) init();
+</script>
+</body>
+</html>
