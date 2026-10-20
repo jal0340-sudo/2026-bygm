@@ -3,57 +3,70 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>글빛 도우미</title>
-<meta name="description" content="중학생 국어 글쓰기 2단계 퇴고 도우미 – 1단계 문장·표현·맞춤법 점검, 2단계 글 유형별 구조·내용 점검">
+<title>글틔움</title>
+<meta name="description" content="문장은 매끄럽게, 글은 탄탄하게 – 중학생이 스스로 글을 점검하고 다듬는 2단계 글쓰기 성장 도우미">
 <meta property="og:type" content="website">
-<meta property="og:site_name" content="글빛 도우미">
-<meta property="og:title" content="글빛 도우미">
-<meta property="og:description" content="중학생 국어 글쓰기 2단계 퇴고 도우미 – 1단계 문장·표현·맞춤법 점검, 2단계 글 유형별 구조·내용 점검">
+<meta property="og:site_name" content="글틔움">
+<meta property="og:title" content="글틔움">
+<meta property="og:description" content="문장은 매끄럽게, 글은 탄탄하게 – 중학생이 스스로 글을 점검하고 다듬는 2단계 글쓰기 성장 도우미">
 <meta property="og:url" content="https://jal0340-sudo.github.io/2026-bygm/">
 <meta property="og:image" content="https://jal0340-sudo.github.io/2026-bygm/img1.png">
 <meta property="og:image:width" content="1376">
 <meta property="og:image:height" content="768">
-<meta property="og:image:alt" content="글빛 도우미 – 내 손으로 직접 쓰는 따뜻한 2단계 국어 글쓰기 도우미">
+<meta property="og:image:alt" content="글틔움 – 2단계 국어 글쓰기 도우미">
 <meta property="og:locale" content="ko_KR">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="글빛 도우미">
-<meta name="twitter:description" content="중학생 국어 글쓰기 2단계 퇴고 도우미">
+<meta name="twitter:title" content="글틔움">
+<meta name="twitter:description" content="문장은 매끄럽게, 글은 탄탄하게 – 2단계 글쓰기 성장 도우미">
 <meta name="twitter:image" content="https://jal0340-sudo.github.io/2026-bygm/img1.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Pen+Script&display=swap">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css">
 <style>
 :root {
-  --bg: #f5f6fa;
+  --bg: #eaf3fc;
+  --bg-2: #f5f9ff;
   --panel: #ffffff;
-  --text: #1f2430;
-  --muted: #5f6677;
-  --line: #e1e4ec;
-  --soft: #f0f2f7;
-  --accent: #3b5bdb;
-  --accent-weak: #e8edff;
+  --text: #1f2a44;
+  --navy: #1d3a7a;
+  --muted: #69738a;
+  --line: #e1e8f3;
+  --soft: #f3f7fd;
+  --accent: #2f55d4;
+  --accent-2: #1e3d8f;
+  --accent-weak: #e6edff;
   --accent-text: #ffffff;
-  --ok: #2b8a3e;
-  --ok-bg: #e9f7ee;
-  --warn: #b35c00;
-  --warn-bg: #fff4e6;
-  --c-ending: #e8590c;  --c-ending-bg: #ffe8d6;
-  --c-style: #7048e8;   --c-style-bg: #ece6ff;
-  --c-spell: #e03131;   --c-spell-bg: #ffe3e3;
-  --c-long: #1c7ed6;    --c-long-bg: #e3f0ff;
-  --c-agree: #2f9e44;   --c-agree-bg: #e3f6e8;
-  --shadow: 0 1px 2px rgba(20, 30, 60, .06), 0 4px 16px rgba(20, 30, 60, .06);
-  --radius: 14px;
-  --font: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", "Noto Sans KR", "Segoe UI", sans-serif;
+  --leaf: #3fa66a;
+  --leaf-dark: #2b8551;
+  --teal: #1f9d7a;   --teal-bg: #e5f6ef;
+  --violet: #6556d3; --violet-bg: #eeecfb;
+  --ok: #2b8a3e;     --ok-bg: #e8f6ed;
+  --warn: #b35c00;   --warn-bg: #fff4e6;
+  --c-ending: #f0700f; --c-ending-bg: #ffe9d8;
+  --c-style: #7048e8;  --c-style-bg: #ece6ff;
+  --c-spell: #e03c4b;  --c-spell-bg: #ffe4e6;
+  --c-long: #1c7ed6;   --c-long-bg: #e3f0ff;
+  --c-agree: #2f9e44;  --c-agree-bg: #e3f6e8;
+  --shadow: 0 1px 2px rgba(29, 58, 122, .05), 0 8px 24px rgba(29, 58, 122, .07);
+  --radius: 18px;
+  --font: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", "맑은 고딕", "Noto Sans KR", sans-serif;
+  --font-logo: "Jua", var(--font);
+  --font-hand: "Nanum Pen Script", var(--font);
 }
 @media (prefers-color-scheme: dark) {
   :root {
-    --bg: #15171c; --panel: #1e2128; --text: #e7e9ee; --muted: #a2a8b6; --line: #333844; --soft: #262a33;
-    --accent: #7c95ff; --accent-weak: #2a3150; --accent-text: #10131a;
+    --bg: #121722; --bg-2: #161c29; --panel: #1c2230; --text: #e6eaf2; --navy: #c9d6ff; --muted: #9aa4b8; --line: #2e3647; --soft: #232a3a;
+    --accent: #7c95ff; --accent-2: #5d7af0; --accent-weak: #283255; --accent-text: #0f1320;
+    --leaf: #5cc487; --leaf-dark: #43a86c;
+    --teal: #4fd1aa; --teal-bg: #183a31; --violet: #a99cff; --violet-bg: #2a2650;
     --ok: #69db7c; --ok-bg: #1f3326; --warn: #ffb35c; --warn-bg: #3a2b19;
     --c-ending: #ff922b; --c-ending-bg: #4a2d14;
     --c-style: #b197fc;  --c-style-bg: #352a55;
-    --c-spell: #ff6b6b;  --c-spell-bg: #4d2226;
+    --c-spell: #ff6b7a;  --c-spell-bg: #4d2229;
     --c-long: #74c0fc;   --c-long-bg: #1c3450;
     --c-agree: #69db7c;  --c-agree-bg: #1f3a28;
-    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 16px rgba(0, 0, 0, .25);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 8px 24px rgba(0, 0, 0, .25);
   }
 }
 * { box-sizing: border-box; }
@@ -61,84 +74,155 @@ html, body { margin: 0; }
 body { background: var(--bg); color: var(--text); font-family: var(--font); font-size: 16px; line-height: 1.6; word-break: keep-all; overflow-wrap: anywhere; }
 button, select, input, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
+a { color: inherit; }
 [hidden] { display: none !important; }
+svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 
-/* 머리말 */
-.app-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 20px; background: var(--panel); border-bottom: 1px solid var(--line); }
-.brand { display: flex; align-items: baseline; gap: 10px; font-weight: 800; font-size: 20px; }
-.brand .logo { color: var(--accent); }
-.brand small { font-weight: 500; font-size: 13px; color: var(--muted); }
-.steps { display: flex; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 13px; color: var(--muted); }
-.steps li { padding: 3px 10px; border-radius: 999px; background: var(--soft); }
+/* ---------- 공통: 머리말·로고 ---------- */
+.topbar { display: flex; align-items: center; gap: 18px; padding: 12px 24px; background: color-mix(in srgb, var(--panel) 88%, transparent); border-bottom: 1px solid var(--line); backdrop-filter: blur(6px); position: sticky; top: 0; z-index: 5; }
+.logo { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; color: var(--navy); font-family: var(--font-logo); font-size: 28px; line-height: 1; border: 0; background: none; padding: 0; }
+.logo svg { width: 34px; height: 34px; }
+.tagline { color: var(--muted); font-size: 14px; }
+.topnav { margin-left: auto; display: flex; gap: 22px; font-size: 15px; }
+.topnav a { text-decoration: none; color: var(--muted); padding: 4px 2px; border-bottom: 2px solid transparent; }
+.topnav a.on { color: var(--navy); font-weight: 700; border-bottom-color: var(--navy); }
+.toplink { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; border: 0; background: none; color: var(--muted); font-size: 15px; padding: 6px 8px; border-radius: 10px; }
+.toplink:hover { background: var(--soft); color: var(--navy); }
 
-/* 좌우 분할 */
-.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding: 16px; height: calc(100vh - 58px); height: calc(100dvh - 58px); }
+/* ---------- 메인 페이지 ---------- */
+.home { max-width: 1120px; margin: 0 auto; padding: 0 20px 40px; }
+.hero { position: relative; display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); align-items: center; gap: 12px; margin-top: 20px; padding: 48px 48px 40px; border-radius: 28px; overflow: hidden;
+  background: radial-gradient(120% 90% at 85% 10%, #ffffff 0%, rgba(255,255,255,0) 55%), linear-gradient(180deg, #d9ebfb 0%, #e9f4fd 60%, #eef8ec 100%); box-shadow: var(--shadow); }
+@media (prefers-color-scheme: dark) { .hero { background: linear-gradient(180deg, #1b2740 0%, #1a2436 60%, #1b2a26 100%); } }
+.hero-title { margin: 0; font-family: var(--font-logo); font-weight: 400; font-size: clamp(64px, 9vw, 104px); line-height: 1; color: var(--navy); display: inline-flex; align-items: flex-start; gap: 4px; letter-spacing: -1px; }
+.hero-title svg { width: .32em; height: .32em; margin-top: -.02em; }
+.hero-sub { margin: 18px 0 14px; font-size: clamp(22px, 2.6vw, 30px); font-weight: 800; color: var(--navy); letter-spacing: -.5px; }
+.hero-desc { margin: 0 0 28px; font-size: 17px; line-height: 1.75; color: var(--text); }
+.cta { display: inline-flex; align-items: center; gap: 14px; border: 0; border-radius: 999px; padding: 18px 34px; font-size: 19px; font-weight: 700; color: #fff; background: linear-gradient(135deg, #2c4fb4, #1b357c); box-shadow: 0 10px 22px rgba(30, 61, 143, .28); transition: transform .15s, box-shadow .15s; }
+.cta:hover { transform: translateY(-2px); box-shadow: 0 14px 28px rgba(30, 61, 143, .34); }
+.cta svg { width: 22px; height: 22px; }
+.hero-art svg { width: 100%; height: auto; display: block; }
+
+.how { margin-top: 22px; padding: 26px 28px 20px; background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); scroll-margin-top: 80px; }
+.how h2 { margin: 0 0 18px; font-size: 20px; color: var(--navy); display: flex; align-items: center; gap: 8px; }
+.how h2 .spark { color: #8fb3f5; }
+.how-steps { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; }
+.how-card { position: relative; border-radius: 16px; padding: 22px 22px 20px 24px; display: grid; grid-template-columns: 64px 1fr; column-gap: 12px; row-gap: 10px; }
+.how-card.s1 { background: var(--teal-bg); }
+.how-card.s2 { background: var(--violet-bg); }
+.how-card .num { position: absolute; left: 14px; top: 14px; width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; color: #fff; font-weight: 800; font-size: 15px; }
+.how-card.s1 .num { background: var(--teal); }
+.how-card.s2 .num { background: var(--violet); }
+.how-card .ic { grid-row: span 1; align-self: center; justify-self: center; margin-top: 14px; }
+.how-card .ic svg { width: 46px; height: 46px; }
+.how-card h3 { margin: 12px 0 0; font-size: 20px; color: var(--navy); }
+.how-card h3 small { display: block; font-size: 14px; font-weight: 700; margin-top: 4px; }
+.how-card.s1 h3 small { color: var(--teal); }
+.how-card.s2 h3 small { color: var(--violet); }
+.how-card p { grid-column: 1 / -1; margin: 0; font-size: 14.5px; color: var(--muted); text-align: center; }
+.how-arrow { color: #8fb3f5; }
+.hand { margin: 22px 0 6px; text-align: center; font-family: var(--font-hand); font-size: 30px; line-height: 1.15; color: var(--accent-2); transform: rotate(-4deg); }
+.hand-line { display: block; width: 200px; height: 10px; margin: 0 auto; color: #9cc0f5; }
+
+.features { margin-top: 18px; display: grid; grid-template-columns: repeat(3, 1fr); background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px 8px; }
+.feature { text-align: center; padding: 4px 16px; }
+.feature + .feature { border-left: 1px solid var(--line); }
+.feature .fi { width: 52px; height: 52px; margin: 0 auto 10px; border-radius: 50%; display: grid; place-items: center; }
+.feature .fi svg { width: 26px; height: 26px; }
+.feature:nth-child(1) .fi { background: var(--accent-weak); color: var(--accent); }
+.feature:nth-child(2) .fi { background: var(--accent-weak); color: var(--accent); }
+.feature:nth-child(3) .fi { background: var(--teal-bg); color: var(--leaf-dark); }
+.feature b { display: block; color: var(--navy); }
+.feature span { font-size: 13.5px; color: var(--muted); }
+.home-note { margin: 16px 4px 0; font-size: 13.5px; color: var(--muted); text-align: center; }
+
+/* ---------- 활동 페이지: 단계 표시 ---------- */
+.stepper { display: flex; align-items: center; gap: 4px; margin: 0 auto; padding: 0; list-style: none; }
+.stepper li { display: flex; align-items: center; }
+.stepper li + li::before { content: "›"; color: #b4c0d6; font-size: 20px; margin: 0 10px; }
+.stepper button { display: inline-flex; align-items: center; gap: 8px; border: 0; background: none; padding: 7px 14px 7px 7px; border-radius: 999px; color: var(--muted); font-size: 14.5px; font-weight: 600; }
+.stepper .n { width: 26px; height: 26px; border-radius: 50%; display: grid; place-items: center; background: #cdd8ec; color: #fff; font-size: 13px; font-weight: 800; }
+.stepper .done .n { background: var(--leaf); }
+.stepper .cur button { background: var(--accent-weak); color: var(--navy); }
+.stepper .cur .n { background: var(--accent); }
+
+/* ---------- 활동 페이지: 좌우 분할 ---------- */
+.split { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; padding: 16px; height: calc(100vh - 63px); height: calc(100dvh - 63px); }
 .pane { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); display: flex; flex-direction: column; min-height: 0; min-width: 0; }
-.pane-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 14px 16px 10px; }
-.pane-head h2 { margin: 0; font-size: 17px; }
-.tools { display: flex; gap: 6px; flex-wrap: wrap; }
+.pane-head { display: flex; align-items: center; gap: 10px; padding: 16px 18px 12px; }
+.pane-icon { width: 38px; height: 38px; border-radius: 11px; background: var(--accent); color: #fff; display: grid; place-items: center; flex: none; }
+.pane-icon svg { width: 20px; height: 20px; }
+.pane-head h2 { margin: 0; font-size: 19px; color: var(--navy); }
+.tools { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
 
-/* 편집창 */
-#editor { flex: 1; min-height: 0; margin: 0 16px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); resize: none; font-size: 17px; line-height: 1.9; outline: none; }
+#editor { flex: 1; min-height: 0; margin: 0 18px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); resize: none; font-size: 16.5px; line-height: 1.95; outline: none; }
 #editor:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-weak); }
 #editor::selection { background: #ffd43b; color: #000; }
-.stats { padding: 8px 18px 0; font-size: 14px; color: var(--muted); }
-.stats b { color: var(--text); }
-.privacy { margin: 6px 16px 14px; padding: 8px 12px; font-size: 13px; color: var(--muted); background: var(--soft); border-radius: 8px; }
+.statbar { display: flex; align-items: center; gap: 10px; padding: 10px 18px 0; }
+.stats { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13.5px; color: var(--muted); }
+.stats b { color: var(--navy); }
+.stats .sep { width: 1px; height: 12px; background: var(--line); }
+.statbar .btn { margin-left: auto; }
+.privacy { display: flex; gap: 12px; align-items: flex-start; margin: 12px 18px 16px; padding: 12px 14px; font-size: 13px; color: var(--muted); background: var(--teal-bg); border-radius: 12px; }
+.privacy svg { color: var(--teal); width: 22px; height: 22px; margin-top: 2px; }
+.privacy b { display: block; color: var(--text); font-size: 13.5px; }
 
 /* 버튼 */
-.btn { border: 1px solid var(--line); background: var(--panel); border-radius: 10px; padding: 7px 14px; font-weight: 600; }
-.btn:hover { border-color: var(--accent); }
-.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); padding: 10px 20px; font-size: 16px; }
-.btn.primary:hover { filter: brightness(1.08); }
-.btn.small { padding: 5px 12px; font-size: 14px; }
-.btn.ghost { font-size: 14px; padding: 6px 12px; }
+.btn { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--panel); border-radius: 10px; padding: 7px 14px; font-weight: 600; font-size: 14px; color: var(--text); }
+.btn:hover { border-color: var(--accent); color: var(--accent); }
+.btn svg.i { width: 16px; height: 16px; }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-text); padding: 11px 22px; font-size: 16px; font-weight: 700; border-radius: 12px; box-shadow: 0 6px 14px rgba(47, 85, 212, .22); }
+.btn.primary:hover { filter: brightness(1.08); color: var(--accent-text); }
+.btn.pill { border-radius: 999px; background: var(--accent); border-color: var(--accent); color: var(--accent-text); padding: 10px 20px; font-weight: 700; }
+.btn.pill:hover { filter: brightness(1.08); color: var(--accent-text); }
+.btn.small { padding: 5px 12px; font-size: 13.5px; }
 .linkbtn { border: 0; background: none; color: var(--accent); font-weight: 700; text-decoration: underline; padding: 0 4px; }
 
 /* 오른쪽 */
-.type-row { display: flex; align-items: center; gap: 10px; padding: 14px 16px 8px; flex-wrap: wrap; }
-.type-row label { font-weight: 700; }
-#genre { padding: 8px 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); min-width: 170px; max-width: 100%; }
+.type-row { display: flex; align-items: center; gap: 12px; padding: 16px 18px 10px; flex-wrap: wrap; }
+.type-row label { font-weight: 700; color: var(--navy); }
+#genre { padding: 9px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); min-width: 190px; max-width: 100%; font-weight: 600; }
 #genre.attn { outline: 3px solid var(--warn); animation: shake .4s; }
 .type-row .hint { font-size: 13px; color: var(--muted); }
 @keyframes shake { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
 
-.tabs { display: flex; gap: 4px; padding: 6px 16px 0; border-bottom: 1px solid var(--line); }
-.tabs [role="tab"] { flex: 1; border: 0; border-bottom: 3px solid transparent; background: none; padding: 10px 8px; font-weight: 700; color: var(--muted); text-align: center; }
-.tabs [role="tab"] span { display: block; font-size: 12px; font-weight: 500; }
-.tabs [role="tab"][aria-selected="true"] { color: var(--accent); border-bottom-color: var(--accent); }
-.tab-panel { flex: 1; min-height: 0; overflow-y: auto; padding: 16px; }
-.panel-actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
-.panel-actions .hint { margin: 0; font-size: 14px; color: var(--muted); flex: 1; min-width: 180px; }
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 4px 18px 12px; border-bottom: 1px solid var(--line); }
+.tabs [role="tab"] { border: 1.5px solid var(--line); background: var(--soft); border-radius: 14px; padding: 12px 8px 10px; font-size: 18px; font-weight: 800; color: var(--muted); text-align: center; line-height: 1.3; }
+.tabs [role="tab"] span { display: block; font-size: 13px; font-weight: 600; margin-top: 2px; }
+.tabs [role="tab"][aria-selected="true"] { background: var(--accent-weak); border-color: color-mix(in srgb, var(--accent) 45%, transparent); color: var(--navy); box-shadow: inset 0 -3px 0 var(--accent); }
+.tab-panel { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 18px; }
+.panel-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
+.panel-actions .hint { margin: 0; font-size: 13.5px; color: var(--muted); flex: 1; min-width: 200px; }
 .stale { margin-bottom: 12px; padding: 10px 12px; border-radius: 10px; background: var(--warn-bg); color: var(--warn); font-size: 14px; font-weight: 600; }
 
-.empty { padding: 24px 18px; text-align: center; color: var(--muted); background: var(--soft); border-radius: 12px; }
-.empty b { color: var(--text); display: block; margin-bottom: 6px; font-size: 17px; }
+.empty { padding: 28px 18px; text-align: center; color: var(--muted); background: var(--soft); border-radius: 14px; }
+.empty b { color: var(--navy); display: block; margin-bottom: 6px; font-size: 17px; }
 .empty p { margin: 4px 0; }
 .empty.good b { color: var(--ok); }
 .muted { color: var(--muted); }
 
 /* 문체 선택 */
-.style-box { padding: 14px; border: 1px solid var(--line); border-radius: 12px; margin-bottom: 14px; }
-.style-box h3 { margin: 0 0 4px; font-size: 15px; }
+.style-box { margin-bottom: 16px; }
+.style-box h3 { margin: 0 0 4px; font-size: 16px; color: var(--navy); }
 .style-box p { margin: 0 0 10px; font-size: 14px; }
-.style-opts { display: flex; flex-wrap: wrap; gap: 8px; }
-.style-opt { display: grid; grid-template-columns: auto 1fr; column-gap: 8px; align-items: center; padding: 8px 12px; border: 2px solid var(--line); border-radius: 10px; cursor: pointer; min-width: 150px; }
+.style-opts { display: grid; grid-template-columns: repeat(auto-fill, minmax(175px, 1fr)); gap: 8px; }
+.style-opt { display: grid; grid-template-columns: auto 1fr; column-gap: 8px; align-items: center; padding: 10px 12px; border: 1.5px solid var(--line); border-radius: 12px; cursor: pointer; }
 .style-opt input { grid-row: span 2; accent-color: var(--c-style); width: 18px; height: 18px; margin: 0; }
 .style-opt .so-name { font-weight: 700; }
-.style-opt .so-name em { font-style: normal; font-weight: 600; font-size: 13px; color: var(--muted); margin-left: 4px; }
+.style-opt .so-name em { font-style: normal; font-weight: 600; font-size: 12.5px; color: var(--muted); margin-left: 4px; }
 .style-opt .so-ex { font-size: 12px; color: var(--muted); }
 .style-opt.on { border-color: var(--c-style); background: var(--c-style-bg); }
 
-.summary { margin: 0 0 10px; font-size: 15px; }
-.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
-.chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--panel); border-radius: 999px; padding: 4px 12px; font-size: 14px; opacity: .55; }
+.summary { margin: 0 0 10px; font-size: 14.5px; }
+.summary b { color: var(--accent); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); background: var(--panel); border-radius: 10px; padding: 5px 11px; font-size: 13.5px; font-weight: 600; opacity: .5; }
 .chip.on { opacity: 1; }
-.chip:disabled { opacity: .35; cursor: default; }
-.chip i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.chip:disabled { opacity: .3; cursor: default; }
+.chip i { width: 10px; height: 10px; border-radius: 3px; display: inline-block; background: var(--cat); }
 
 /* 하이라이트 미리보기 */
-.preview { white-space: pre-wrap; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--soft); line-height: 2.1; font-size: 16px; margin-bottom: 16px; max-height: 42vh; overflow-y: auto; }
+.preview { white-space: pre-wrap; padding: 16px 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--soft); line-height: 2.1; font-size: 15px; margin-bottom: 16px; max-height: 42vh; overflow-y: auto; }
 .preview [data-ids] { cursor: pointer; border-radius: 3px; }
 .hl-ending { background: var(--c-ending-bg); box-shadow: inset 0 -2px 0 var(--c-ending); }
 .hl-style  { background: var(--c-style-bg);  box-shadow: inset 0 -2px 0 var(--c-style); }
@@ -151,19 +235,18 @@ button { cursor: pointer; }
 .c-spell  { --cat: var(--c-spell);  --cat-bg: var(--c-spell-bg); }
 .c-long   { --cat: var(--c-long);   --cat-bg: var(--c-long-bg); }
 .c-agree  { --cat: var(--c-agree);  --cat-bg: var(--c-agree-bg); }
-.chip i { background: var(--cat); }
 
 /* 카드 */
 .cards { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
-.card { border: 1px solid var(--line); border-left: 5px solid var(--cat); border-radius: 12px; padding: 12px 14px; background: var(--panel); transition: opacity .2s, box-shadow .3s; }
+.card { border: 1px solid var(--line); border-left: 5px solid var(--cat); border-radius: 14px; padding: 13px 15px; background: var(--panel); transition: opacity .2s, box-shadow .3s; }
 .card.flash { box-shadow: 0 0 0 3px var(--cat); }
 .card.done { opacity: .5; }
 .card-head { display: flex; justify-content: space-between; align-items: center; gap: 8px; margin-bottom: 6px; }
 .badge { font-size: 13px; font-weight: 700; color: var(--cat); background: var(--cat-bg); padding: 2px 10px; border-radius: 999px; }
 .where { font-size: 12px; color: var(--muted); }
-.card blockquote { margin: 0 0 8px; padding: 6px 10px; background: var(--soft); border-radius: 8px; font-size: 15px; }
+.card blockquote { margin: 0 0 8px; padding: 7px 11px; background: var(--soft); border-radius: 9px; font-size: 14.5px; }
 .card blockquote mark { background: var(--cat-bg); color: inherit; box-shadow: inset 0 -2px 0 var(--cat); border-radius: 2px; }
-.card .msg { margin: 0 0 6px; }
+.card .msg { margin: 0 0 6px; font-size: 15px; }
 .sugg { margin: 0 0 6px; font-size: 15px; }
 .sugg s { color: var(--muted); }
 .sugg b { color: var(--cat); }
@@ -173,20 +256,25 @@ button { cursor: pointer; }
 .card-actions { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 8px; }
 .done-check { font-size: 14px; display: flex; align-items: center; gap: 6px; cursor: pointer; }
 .done-check input { width: 18px; height: 18px; accent-color: var(--ok); }
-.next { margin-top: 18px; text-align: right; }
+
+/* 다음 단계 안내 */
+.next-tip { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 18px; padding: 16px 18px; border-radius: 14px; background: var(--accent-weak); }
+.next-tip .bulb { font-size: 26px; line-height: 1; }
+.next-tip p { margin: 0; flex: 1; min-width: 200px; font-size: 14px; color: var(--text); }
+.next-tip p b { color: var(--navy); }
 
 /* 2단계 */
 .s2-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
-.s2-head h3 { margin: 0; font-size: 18px; }
+.s2-head h3 { margin: 0; font-size: 18px; color: var(--navy); }
 .progress { display: flex; align-items: center; gap: 8px; font-size: 14px; color: var(--muted); }
 .progress b { color: var(--text); }
 .bar { width: 110px; height: 8px; background: var(--soft); border-radius: 999px; overflow: hidden; }
-.bar i { display: block; height: 100%; background: var(--ok); transition: width .3s; }
+.bar i { display: block; height: 100%; background: var(--leaf); transition: width .3s; }
 .note, .para-note { font-size: 14px; color: var(--muted); margin: 0 0 10px; }
-.para-note { color: var(--warn); background: var(--warn-bg); padding: 8px 12px; border-radius: 8px; }
-.s2-sec h4 { margin: 18px 0 8px; font-size: 15px; color: var(--accent); }
+.para-note { color: var(--warn); background: var(--warn-bg); padding: 8px 12px; border-radius: 10px; }
+.s2-sec h4 { margin: 18px 0 8px; font-size: 15px; color: var(--violet); }
 .checks { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
-.ck { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; background: var(--panel); }
+.ck { border: 1px solid var(--line); border-radius: 14px; padding: 13px 15px; background: var(--panel); }
 .ck.checked { background: var(--ok-bg); border-color: var(--ok); }
 .ck-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
 .ck-top label { display: flex; gap: 10px; align-items: flex-start; font-weight: 700; cursor: pointer; }
@@ -205,92 +293,219 @@ button { cursor: pointer; }
 .finish { margin-top: 16px; padding: 14px; border-radius: 12px; background: var(--ok-bg); color: var(--ok); font-weight: 700; text-align: center; }
 
 /* 알림 */
-#toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); background: #222; color: #fff; padding: 10px 18px; border-radius: 10px; font-size: 15px; opacity: 0; pointer-events: none; transition: .25s; z-index: 10; max-width: calc(100% - 32px); }
+#toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); background: #1f2a44; color: #fff; padding: 10px 18px; border-radius: 12px; font-size: 15px; opacity: 0; pointer-events: none; transition: .25s; z-index: 10; max-width: calc(100% - 32px); }
 #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 #mirror { position: absolute; top: 0; left: -9999px; visibility: hidden; white-space: pre-wrap; overflow-wrap: break-word; border: 0; }
 
-/* 태블릿 세로 · 스마트폰 */
+/* ---------- 태블릿·스마트폰 ---------- */
+@media (max-width: 1180px) {
+  .stepper .lbl { display: none; }
+  .stepper .cur .lbl { display: inline; }
+  .tagline { display: none; }
+}
 @media (max-width: 899px) {
+  .topbar { padding: 10px 16px; gap: 12px; }
+  .logo { font-size: 24px; }
+  .logo svg { width: 28px; height: 28px; }
+  .stepper li + li::before { margin: 0 4px; }
+  .stepper button { padding: 5px; }
+  .toplink span { display: none; }
+  .home { padding: 0 16px 32px; }
+  .hero { grid-template-columns: minmax(0, 1fr); padding: 32px 24px 0; text-align: left; }
+  .hero-art { max-width: 380px; margin: 0 auto; }
+  .how { padding: 20px 16px; }
+  .how-steps { grid-template-columns: minmax(0, 1fr); }
+  .how-arrow { justify-self: center; transform: rotate(90deg); }
+  .features { grid-template-columns: minmax(0, 1fr); padding: 8px 16px; }
+  .feature { padding: 14px 4px; }
+  .feature + .feature { border-left: 0; border-top: 1px solid var(--line); }
   .split { grid-template-columns: minmax(0, 1fr); height: auto; padding: 12px; gap: 12px; }
   #editor { min-height: 50vh; flex: none; }
   .tab-panel { overflow: visible; }
   .preview { max-height: none; }
-  .steps { display: none; }
-  .app-header { padding: 10px 16px; }
 }
 </style>
 </head>
 <body>
-<header class="app-header">
-  <div class="brand"><span class="logo" aria-hidden="true">✦</span>글빛 도우미<small>중학생 글쓰기 2단계 퇴고</small></div>
-  <ol class="steps">
-    <li>① 글 입력</li><li>② 1단계 점검</li><li>③ 글 유형 선택</li><li>④ 2단계 점검</li>
-  </ol>
-</header>
 
-<main class="split">
-  <section class="pane" aria-label="글 입력">
-    <div class="pane-head">
-      <h2>✍️ 내 글</h2>
-      <div class="tools">
-        <button type="button" class="btn ghost" id="btnSample">예시 글</button>
-        <button type="button" class="btn ghost" id="btnCopy">복사</button>
-        <button type="button" class="btn ghost" id="btnClear">지우기</button>
+<!-- 아이콘 -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-sprout" viewBox="0 0 40 40"><path d="M20 37V21" stroke="#2b8551" stroke-width="3.6" stroke-linecap="round" fill="none"/><path d="M19.5 23C9 23 4.5 14.5 5 6.5c9.5-.2 15.5 6 14.5 16.5Z" fill="#5bbf7e"/><path d="M20.5 21c.5-9.5 7.5-15 15-14.5.3 9-6 15.5-15 14.5Z" fill="#2f9a5b"/></symbol>
+  <symbol id="i-leaf" viewBox="0 0 24 24"><path d="M5 19C5 10 11 4 20 4c0 9-6 15-15 15Z" fill="#5bbf7e"/><path d="M5 19 13 11" stroke="#2b8551" stroke-width="1.6" stroke-linecap="round"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M12 11v6M9 14h6"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1"/></symbol>
+  <symbol id="i-trash" viewBox="0 0 24 24"><path d="M3 6h18M8 6V4h8v2M6 6l1 14a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-14M10 11v6M14 11v6"/></symbol>
+  <symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 0 1 15.5-6.3L21 8M21 3v5h-5M21 12a9 9 0 0 1-15.5 6.3L3 16M3 21v-5h5"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/></symbol>
+  <symbol id="i-home" viewBox="0 0 24 24"><path d="M3 11 12 4l9 7M5 10v10h5v-6h4v6h5V10"/></symbol>
+  <symbol id="i-text" viewBox="0 0 24 24"><path d="M4 5h16M4 10h16M4 15h10M4 20h7"/></symbol>
+  <symbol id="i-pen" viewBox="0 0 24 24"><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4z"/><path d="M14.5 5.5l3 3"/></symbol>
+  <symbol id="i-search" viewBox="0 0 48 48"><circle cx="21" cy="20" r="11" fill="#e8f4ff" stroke="#1d3a7a" stroke-width="4"/><path d="M29.5 28.5 40 39" stroke="#1d3a7a" stroke-width="6" stroke-linecap="round"/><path d="M15 16a7 7 0 0 1 6-4" stroke="#8fc3f0" stroke-width="3" stroke-linecap="round" fill="none"/></symbol>
+  <symbol id="i-list" viewBox="0 0 48 48"><rect x="9" y="8" width="30" height="34" rx="5" fill="#ffffff" stroke="#5b4fc7" stroke-width="3.5"/><rect x="17" y="4" width="14" height="8" rx="3" fill="#7b6fe0"/><path d="M16 21h16M16 28h16M16 35h10" stroke="#5b4fc7" stroke-width="3.5" stroke-linecap="round"/></symbol>
+</svg>
+
+<!-- ================= 메인 페이지 ================= -->
+<div id="pageHome">
+  <header class="topbar">
+    <a class="logo" href="#home" aria-label="글틔움 처음 화면"><svg aria-hidden="true"><use href="#i-sprout"/></svg>글틔움</a>
+    <span class="tagline">오늘도, 더 좋은 글을 위해</span>
+    <nav class="topnav" aria-label="메뉴">
+      <a href="#home" class="on" data-nav="home">홈</a>
+      <a href="#guide" data-nav="guide">이용 안내</a>
+    </nav>
+  </header>
+
+  <main class="home">
+    <section class="hero">
+      <div class="hero-text">
+        <h1 class="hero-title">글틔움<svg aria-hidden="true"><use href="#i-leaf"/></svg></h1>
+        <p class="hero-sub">문장은 매끄럽게, 글은 탄탄하게</p>
+        <p class="hero-desc">내 글을 스스로 점검하고,<br>더 좋은 글로 다듬어 가는 글쓰기 성장 도우미,<br>지금 바로 시작해 보세요!</p>
+        <button type="button" class="cta" id="btnStart">글다듬기 시작하기 <svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg></button>
       </div>
-    </div>
-    <textarea id="editor" spellcheck="false" aria-label="글 입력 편집창" placeholder="공책에 쓴 초고를 여기에 옮겨 적어 보세요.
+      <div class="hero-art" aria-hidden="true">
+        <svg viewBox="0 0 420 330">
+          <defs>
+            <linearGradient id="gHill" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#bfe3a8"/><stop offset="1" stop-color="#93cf7d"/></linearGradient>
+            <linearGradient id="gPencil" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#6c7cf0"/><stop offset="1" stop-color="#4b55d6"/></linearGradient>
+          </defs>
+          <g fill="#ffffff" opacity=".9">
+            <ellipse cx="330" cy="62" rx="58" ry="22"/><ellipse cx="300" cy="52" rx="34" ry="24"/><ellipse cx="352" cy="48" rx="28" ry="20"/>
+            <ellipse cx="70" cy="110" rx="46" ry="16"/><ellipse cx="88" cy="100" rx="26" ry="18"/>
+          </g>
+          <ellipse cx="210" cy="322" rx="240" ry="62" fill="url(#gHill)"/>
+          <g transform="translate(14 232) rotate(-6)">
+            <rect x="0" y="34" width="190" height="44" rx="9" fill="#5b6bd6"/><rect x="8" y="40" width="176" height="32" rx="6" fill="#f4f1e6"/><rect x="0" y="34" width="20" height="44" rx="6" fill="#4553bf"/>
+            <rect x="14" y="0" width="176" height="40" rx="9" fill="#4fa86c"/><rect x="22" y="6" width="162" height="28" rx="6" fill="#f4f1e6"/><rect x="14" y="0" width="20" height="40" rx="6" fill="#3d8f58"/>
+          </g>
+          <g transform="translate(120 70) rotate(12)">
+            <path d="M54 22c-4-18 6-30 18-34-2 14-8 26-18 34Z" fill="#6cc48a"/><path d="M58 22c8-14 22-18 34-14-8 12-20 18-34 14Z" fill="#3fa66a"/><path d="M56 22v18" stroke="#2f8a52" stroke-width="3" stroke-linecap="round"/>
+            <rect x="0" y="36" width="190" height="206" rx="12" fill="#3f9a62"/>
+            <rect x="8" y="30" width="184" height="206" rx="10" fill="#fffdf6" stroke="#dfe7d6" stroke-width="2"/>
+            <g stroke="#dfe8f3" stroke-width="2"><path d="M24 78h152M24 112h152M24 146h152M24 180h152M24 214h152"/></g>
+            <g font-family="'Nanum Pen Script', cursive" font-size="26" fill="#2d3a63">
+              <text x="30" y="72">조금만 더</text><text x="30" y="106">다듬으면,</text><text x="30" y="140">더 좋은 글이 될 거야!</text>
+            </g>
+            <path d="M92 168q8 9 16 0" stroke="#2d3a63" stroke-width="2.4" fill="none" stroke-linecap="round"/><circle cx="94" cy="160" r="1.8" fill="#2d3a63"/><circle cx="106" cy="160" r="1.8" fill="#2d3a63"/>
+          </g>
+          <g transform="translate(330 40) rotate(28)">
+            <rect x="0" y="0" width="22" height="150" rx="6" fill="url(#gPencil)"/><rect x="0" y="0" width="22" height="18" rx="6" fill="#9aa6f7"/><rect x="0" y="16" width="22" height="8" fill="#c9cdf5"/>
+            <path d="M0 148h22l-11 26Z" fill="#f2d3a2"/><path d="M7 164h8l-4 10Z" fill="#3a3f7a"/>
+          </g>
+          <g fill="#f7c948"><path d="M348 150l4 10 10 4-10 4-4 10-4-10-10-4 10-4Z"/><path d="M118 60l3 7 7 3-7 3-3 7-3-7-7-3 7-3Z"/><path d="M372 104l2.5 6 6 2.5-6 2.5-2.5 6-2.5-6-6-2.5 6-2.5Z"/></g>
+          <g transform="translate(232 18)"><path d="M18 46c-6-16 2-30 14-34 0 14-6 26-14 34Z" fill="#6cc48a"/><path d="M20 46c4-14 18-22 30-20-4 12-16 20-30 20Z" fill="#3fa66a"/><path d="M19 46v16" stroke="#2f8a52" stroke-width="3" stroke-linecap="round"/></g>
+          <g fill="#6cbf6f"><path d="M28 300c-6-26 4-48 14-56 4 20-2 40-14 56Z"/><path d="M40 304c2-22 16-36 30-38-4 18-14 30-30 38Z" fill="#4ea85a"/><path d="M380 300c-4-22 6-40 16-46 2 18-4 34-16 46Z"/></g>
+          <g fill="#fff"><circle cx="58" cy="292" r="5"/><circle cx="364" cy="300" r="5"/></g><g fill="#ffd66b"><circle cx="58" cy="292" r="2"/><circle cx="364" cy="300" r="2"/></g>
+        </svg>
+      </div>
+    </section>
+
+    <section class="how" id="guide" aria-labelledby="howTitle">
+      <h2 id="howTitle"><span class="spark">✦</span>글틔움은 이렇게 도와줘요!</h2>
+      <div class="how-steps">
+        <article class="how-card s1">
+          <span class="num">1</span>
+          <span class="ic"><svg aria-hidden="true"><use href="#i-search"/></svg></span>
+          <h3>1단계<small>맞춤법·띄어쓰기·문장 표현 점검</small></h3>
+          <p>자주 틀리는 맞춤법과 띄어쓰기를 잡아 주고,<br>문장 표현과 호응까지 꼼꼼하게 확인해요.</p>
+        </article>
+        <svg class="i how-arrow" aria-hidden="true"><use href="#i-arrow"/></svg>
+        <article class="how-card s2">
+          <span class="num">2</span>
+          <span class="ic"><svg aria-hidden="true"><use href="#i-list"/></svg></span>
+          <h3>2단계<small>글의 구조·통일성 점검</small></h3>
+          <p>글의 유형에 맞는 구조와<br>내용의 통일성을 점검해요.</p>
+        </article>
+      </div>
+      <p class="hand">글틔움과 함께<br>더 좋은 글을 써 보세요!</p>
+      <svg class="hand-line" viewBox="0 0 200 10" aria-hidden="true"><path d="M4 7q96-8 192-2" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+    </section>
+
+    <section class="features" aria-label="주요 기능">
+      <div class="feature"><div class="fi"><svg class="i" aria-hidden="true"><use href="#i-pen"/></svg></div><b>맞춤법 검사</b><span>꼼꼼한 맞춤법·띄어쓰기 점검</span></div>
+      <div class="feature"><div class="fi"><svg class="i" aria-hidden="true"><use href="#i-doc"/></svg></div><b>글의 구조 점검</b><span>유형별 맞춤 구조 분석</span></div>
+      <div class="feature"><div class="fi"><svg aria-hidden="true"><use href="#i-leaf"/></svg></div><b>자기 주도 학습</b><span>스스로 고쳐 쓰는 글쓰기 습관</span></div>
+    </section>
+    <p class="home-note">🔒 글틔움은 로그인 없이 쓰고, 여러분의 글은 이 기기 브라우저 안에서만 처리돼요. 어디에도 저장·전송되지 않아요.</p>
+  </main>
+</div>
+
+<!-- ================= 글다듬기 활동 페이지 ================= -->
+<div id="pageWork" hidden>
+  <header class="topbar">
+    <a class="logo" href="#home" aria-label="글틔움 처음 화면"><svg aria-hidden="true"><use href="#i-sprout"/></svg>글틔움</a>
+    <ol class="stepper" id="stepper" aria-label="진행 단계">
+      <li data-step="1"><button type="button"><span class="n">1</span><span class="lbl">글 입력</span></button></li>
+      <li data-step="2"><button type="button"><span class="n">2</span><span class="lbl">1단계 점검</span></button></li>
+      <li data-step="3"><button type="button"><span class="n">3</span><span class="lbl">글 유형 선택</span></button></li>
+      <li data-step="4"><button type="button"><span class="n">4</span><span class="lbl">2단계 점검</span></button></li>
+    </ol>
+    <button type="button" class="toplink" id="btnHome"><svg class="i" aria-hidden="true"><use href="#i-home"/></svg><span>처음으로</span></button>
+  </header>
+
+  <main class="split">
+    <section class="pane" aria-label="글 입력">
+      <div class="pane-head">
+        <span class="pane-icon"><svg class="i" aria-hidden="true"><use href="#i-doc"/></svg></span>
+        <h2>내 글</h2>
+        <div class="tools">
+          <button type="button" class="btn" id="btnSample"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>예시 글</button>
+          <button type="button" class="btn" id="btnCopy"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg>복사</button>
+          <button type="button" class="btn" id="btnClear"><svg class="i" aria-hidden="true"><use href="#i-trash"/></svg>지우기</button>
+        </div>
+      </div>
+      <textarea id="editor" spellcheck="false" aria-label="글 입력 편집창" placeholder="공책에 쓴 초고를 여기에 옮겨 적어 보세요.
 
 · 첫 줄에 제목을 쓰면, 제목은 빼고 점검해요.
 · 문단이 바뀌는 곳에서는 줄을 바꾸거나 한 줄을 띄어 주세요."></textarea>
-    <div class="stats" id="stats"></div>
-    <p class="privacy">🔒 글은 이 기기의 브라우저 안에서만 처리되고, 어디에도 저장·전송되지 않아요. 창을 닫으면 사라지니 <b>복사</b>로 옮겨 두세요.</p>
-  </section>
-
-  <section class="pane" aria-label="피드백">
-    <div class="type-row">
-      <label for="genre">글 유형</label>
-      <select id="genre">
-        <option value="">— 골라 주세요 —</option>
-        <option value="explain">설명하는 글</option>
-        <option value="argue">주장하는 글</option>
-        <option value="heart">마음을 전하는 글</option>
-      </select>
-      <span class="hint">2단계 점검 전에 골라 주세요.</span>
-    </div>
-    <div class="tabs" role="tablist">
-      <button type="button" role="tab" id="tab1" aria-controls="panel1" aria-selected="true">1단계<span>문장·표현·맞춤법·호응</span></button>
-      <button type="button" role="tab" id="tab2" aria-controls="panel2" aria-selected="false">2단계<span>구조·내용</span></button>
-    </div>
-
-    <div class="tab-panel" id="panel1" role="tabpanel" aria-labelledby="tab1">
-      <div class="panel-actions">
-        <button type="button" class="btn primary" id="btnStage1">1단계 점검</button>
-        <p class="hint">구어체 어미, 문체, 긴 문장, 맞춤법·띄어쓰기, 문장 호응을 살펴봐요. 맞춤법·띄어쓰기는 국립국어원 「한국 어문 규정집」을 근거로 해요.</p>
+      <div class="statbar">
+        <div class="stats" id="stats"></div>
+        <button type="button" class="btn small" id="btnReset" title="점검 결과를 지우고 처음 단계로 돌아가요. 글은 그대로 남아요."><svg class="i" aria-hidden="true"><use href="#i-reset"/></svg>초기화</button>
       </div>
-      <div class="stale" id="stale1" hidden>글이 바뀌었어요. 고친 글로 <button type="button" class="linkbtn" data-rerun="1">다시 점검</button>해 보세요.</div>
-      <div id="result1">
-        <div class="empty">
-          <b>왼쪽에 글을 입력하고 [1단계 점검]을 눌러 보세요.</b>
-          <p>어색한 어미(~했음), 섞여 쓴 문체, 60자가 넘는 긴 문장,<br>자주 틀리는 맞춤법·띄어쓰기, 어색한 문장 호응을 찾아 줘요.</p>
+      <div class="privacy">
+        <svg class="i" aria-hidden="true"><use href="#i-lock"/></svg>
+        <div><b>글틔움은 여러분의 글을 안전하게 보호합니다.</b>모든 작성 내용은 다른 사람에게 공개되지 않으며, 저장되지 않습니다. 창을 닫기 전에 <b style="display:inline">복사</b>로 옮겨 두세요.</div>
+      </div>
+    </section>
+
+    <section class="pane" aria-label="피드백">
+      <div class="type-row">
+        <label for="genre">글 유형</label>
+        <select id="genre">
+          <option value="">— 골라 주세요 —</option>
+          <option value="explain">설명하는 글</option>
+          <option value="argue">주장하는 글</option>
+          <option value="heart">마음을 전하는 글</option>
+        </select>
+        <span class="hint">2단계 점검 전에 골라 주세요.</span>
+      </div>
+      <div class="tabs" role="tablist">
+        <button type="button" role="tab" id="tab1" aria-controls="panel1" aria-selected="true">1단계<span>문장·표현·맞춤법·호응</span></button>
+        <button type="button" role="tab" id="tab2" aria-controls="panel2" aria-selected="false">2단계<span>구조·내용</span></button>
+      </div>
+
+      <div class="tab-panel" id="panel1" role="tabpanel" aria-labelledby="tab1">
+        <div class="panel-actions">
+          <button type="button" class="btn primary" id="btnStage1">1단계 점검</button>
+          <p class="hint">구어체 어미, 문체, 긴 문장, 맞춤법·띄어쓰기, 문장 호응을 살펴봐요. 맞춤법·띄어쓰기는 국립국어원 「한국 어문 규정집」을 근거로 해요.</p>
         </div>
+        <div class="stale" id="stale1" hidden>글이 바뀌었어요. 고친 글로 <button type="button" class="linkbtn" data-rerun="1">다시 점검</button>해 보세요.</div>
+        <div id="result1"></div>
       </div>
-    </div>
 
-    <div class="tab-panel" id="panel2" role="tabpanel" aria-labelledby="tab2" hidden>
-      <div class="panel-actions">
-        <button type="button" class="btn primary" id="btnStage2">2단계 점검</button>
-        <p class="hint" id="hint2">위에서 글 유형을 먼저 골라 주세요.</p>
-      </div>
-      <div class="stale" id="stale2" hidden>글이 바뀌었어요. 고친 글로 <button type="button" class="linkbtn" data-rerun="2">다시 점검</button>해 보세요.</div>
-      <div id="result2">
-        <div class="empty">
-          <b>글 유형을 고르고 [2단계 점검]을 눌러 보세요.</b>
-          <p>글 유형에 꼭 필요한 짜임(처음·중간·끝)과 내용 요소를<br>점검표로 하나씩 확인할 수 있어요.</p>
+      <div class="tab-panel" id="panel2" role="tabpanel" aria-labelledby="tab2" hidden>
+        <div class="panel-actions">
+          <button type="button" class="btn primary" id="btnStage2">2단계 점검</button>
+          <p class="hint" id="hint2">위에서 글 유형을 먼저 골라 주세요.</p>
         </div>
+        <div class="stale" id="stale2" hidden>글이 바뀌었어요. 고친 글로 <button type="button" class="linkbtn" data-rerun="2">다시 점검</button>해 보세요.</div>
+        <div id="result2"></div>
       </div>
-    </div>
-  </section>
-</main>
+    </section>
+  </main>
+</div>
 
 <div id="toast" role="status" aria-live="polite"></div>
 <div id="mirror" aria-hidden="true"></div>
@@ -1026,9 +1241,11 @@ function updateStats() {
   const text = editor.value;
   const sents = text.trim() ? analyzeSentences(text) : [];
   const paras = text.trim() ? getParagraphs(text, sents) : [];
-  $('#stats').innerHTML = `공백 포함 <b>${text.length}</b>자 · 문장 <b>${sents.filter(s => !s.isTitle).length}</b>개 · 문단 <b>${paras.length}</b>개`;
+  const sep = '<i class="sep"></i>';
+  $('#stats').innerHTML = `<span>공백 포함 <b>${text.length}</b>자</span>${sep}<span>문장 <b>${sents.filter(s => !s.isTitle).length}</b>개</span>${sep}<span>문단 <b>${paras.length}</b>개</span>`;
   $('#stale1').hidden = !(state.s1 && state.s1.text !== text);
   $('#stale2').hidden = !(state.s2 && state.s2.text !== text);
+  updateSteps();
 }
 
 function showTab(n) {
@@ -1036,6 +1253,47 @@ function showTab(n) {
     $('#tab' + k).setAttribute('aria-selected', String(k === n));
     $('#panel' + k).hidden = k !== n;
   });
+}
+
+/* ---------- 진행 단계 표시 (글 입력 → 1단계 점검 → 글 유형 선택 → 2단계 점검) ---------- */
+function updateSteps() {
+  const done = [!!editor.value.trim(), !!state.s1, !!$('#genre').value, !!state.s2];
+  const cur = done.indexOf(false); // 모두 마치면 -1 → 네 단계 모두 완료 표시
+  document.querySelectorAll('#stepper li').forEach((li, k) => {
+    li.classList.toggle('done', done[k] && k !== cur);
+    li.classList.toggle('cur', k === cur);
+    li.querySelector('button').setAttribute('aria-current', k === cur ? 'step' : 'false');
+  });
+}
+
+const EMPTY1 = `<div class="empty">
+  <b>왼쪽에 글을 입력하고 [1단계 점검]을 눌러 보세요.</b>
+  <p>어색한 어미(~했음), 섞여 쓴 문체, 60자가 넘는 긴 문장,<br>자주 틀리는 맞춤법·띄어쓰기, 어색한 문장 호응을 찾아 줘요.</p>
+</div>`;
+const EMPTY2 = `<div class="empty">
+  <b>글 유형을 고르고 [2단계 점검]을 눌러 보세요.</b>
+  <p>글 유형에 꼭 필요한 짜임(처음·중간·끝)과 내용 요소를<br>점검표로 하나씩 확인할 수 있어요.</p>
+</div>`;
+
+function resetResults() {
+  state.s1 = state.s2 = null;
+  state.done.clear();
+  $('#result1').innerHTML = EMPTY1;
+  $('#result2').innerHTML = EMPTY2;
+  showTab(1);
+  updateStats();
+}
+
+/* ---------- 메인 페이지 ↔ 활동 페이지 ---------- */
+function route() {
+  const work = location.hash === '#write';
+  $('#pageHome').hidden = work;
+  $('#pageWork').hidden = !work;
+  document.title = work ? '글다듬기 – 글틔움' : '글틔움';
+  document.querySelectorAll('[data-nav]').forEach(a => a.classList.toggle('on', a.dataset.nav === (location.hash === '#guide' ? 'guide' : 'home')));
+  if (work) { window.scrollTo(0, 0); updateSteps(); }
+  else if (location.hash === '#guide') $('#guide').scrollIntoView({ behavior: 'smooth' });
+  else window.scrollTo(0, 0);
 }
 
 /* ---------- 편집창의 특정 위치로 이동 ---------- */
@@ -1164,7 +1422,9 @@ function renderStage1() {
     html += `<div class="preview" id="preview">${previewHTML(r.text, r.issues)}</div>`;
     html += `<ol class="cards">${r.issues.filter(i => state.filters.has(i.cat)).map(cardHTML).join('')}</ol>`;
   }
-  html += '<div class="next"><button type="button" class="btn" data-goto="2">2단계: 구조·내용 점검으로 →</button></div>';
+  html += `<div class="next-tip"><span class="bulb" aria-hidden="true">💡</span>
+    <p><b>맞춤법과 띄어쓰기를 먼저 점검</b>하고,<br>이어서 <b>글의 구조와 통일성</b>을 확인해 보세요.</p>
+    <button type="button" class="btn pill" data-goto="2">2단계 점검하러 가기 <svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg></button></div>`;
   $('#result1').innerHTML = html;
 }
 
@@ -1269,7 +1529,32 @@ const SAMPLES = {
 /* ---------- 이벤트 ---------- */
 function init() {
   editor = $('#editor');
+  $('#result1').innerHTML = EMPTY1;
+  $('#result2').innerHTML = EMPTY2;
   updateStats();
+
+  // 페이지 이동
+  $('#btnStart').addEventListener('click', () => { location.hash = 'write'; });
+  $('#btnHome').addEventListener('click', () => { location.hash = 'home'; });
+  window.addEventListener('hashchange', route);
+  route();
+
+  // 단계 표시를 누르면 해당 단계로 이동
+  $('#stepper').addEventListener('click', e => {
+    const li = e.target.closest('li[data-step]');
+    if (!li) return;
+    const n = +li.dataset.step;
+    if (n === 1) editor.focus();
+    else if (n === 2) showTab(1);
+    else if (n === 3) $('#genre').focus();
+    else showTab(2);
+  });
+
+  $('#btnReset').addEventListener('click', () => {
+    if (!state.s1 && !state.s2) { toast('아직 점검한 결과가 없어요.'); return; }
+    resetResults();
+    toast('점검 결과를 초기화했어요. 글은 그대로 남아 있어요.');
+  });
 
   editor.addEventListener('input', updateStats);
   $('#tab1').addEventListener('click', () => showTab(1));
@@ -1282,6 +1567,7 @@ function init() {
     const v = e.target.value;
     $('#hint2').textContent = v ? `‘${CHECKLISTS[v].label}’ 점검표로 살펴봐요.` : '위에서 글 유형을 먼저 골라 주세요.';
     if (state.s2 && v) runStage2();
+    updateSteps();
   });
 
   $('#btnSample').addEventListener('click', () => {
@@ -1310,10 +1596,7 @@ function init() {
     if (!editor.value.trim()) return;
     if (!confirm('글을 모두 지울까요? 저장되지 않으므로 되돌릴 수 없어요.')) return;
     editor.value = '';
-    state.s1 = state.s2 = null;
-    $('#result1').innerHTML = '<div class="empty"><b>왼쪽에 글을 입력하고 [1단계 점검]을 눌러 보세요.</b></div>';
-    $('#result2').innerHTML = '<div class="empty"><b>글 유형을 고르고 [2단계 점검]을 눌러 보세요.</b></div>';
-    updateStats();
+    resetResults();
     editor.focus();
   });
 
