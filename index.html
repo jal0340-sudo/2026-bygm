@@ -191,8 +191,11 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
 .pane-head h2 { margin: 0; font-size: 19px; color: var(--navy); }
 .tools { display: flex; gap: 6px; flex-wrap: wrap; margin-left: auto; }
 
-#editor { flex: 1; min-height: 0; margin: 0 18px; padding: 16px 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); resize: none; font-size: 16.5px; line-height: 1.95; outline: none; }
-#editor:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-weak); }
+.editor-wrap { position: relative; flex: 1; min-height: 0; display: flex; margin: 0 18px; border-radius: 14px; background: var(--panel); }
+#editor { position: relative; z-index: 1; flex: 1; width: 100%; min-height: 0; margin: 0; padding: 16px 18px; border: 1px solid var(--line); border-radius: 14px; background: transparent; resize: none; font-size: 16.5px; line-height: 1.95; outline: none; }
+/* 1단계 점검 결과를 편집창 글자 아래에 겹쳐 그리는 층 (글자는 투명, 색 표시만 보임) */
+.backdrop { position: absolute; left: 0; top: 0; height: 100%; box-sizing: border-box; border: 1px solid transparent; border-radius: 14px; overflow: hidden; pointer-events: none; color: transparent; white-space: pre-wrap; overflow-wrap: break-word; }
+.backdrop span { border-radius: 3px; }#editor:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-weak); }
 #editor::selection { background: #ffd43b; color: #000; }
 .statbar { display: flex; align-items: center; gap: 10px; padding: 10px 18px 0; }
 .stats { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13.5px; color: var(--muted); }
@@ -362,7 +365,8 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
   .feature + .feature { border-left: 0; }
   .feature:nth-child(even) { border-left: 1px solid var(--line); }
   .split { grid-template-columns: minmax(0, 1fr); height: auto; padding: 12px; gap: 12px; }
-  #editor { min-height: 50vh; flex: none; }
+  .editor-wrap { flex: none; }
+  #editor { min-height: 50vh; flex: 1; }
   .tab-panel { overflow: visible; }
   .preview { max-height: none; }
 }
@@ -544,10 +548,13 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
           <button type="button" class="btn" id="btnClear"><svg class="i" aria-hidden="true"><use href="#i-trash"/></svg>지우기</button>
         </div>
       </div>
-      <textarea id="editor" spellcheck="false" aria-label="글 입력 편집창" placeholder="공책에 쓴 초고를 여기에 옮겨 적어 보세요.
+      <div class="editor-wrap">
+        <div class="backdrop" id="backdrop" aria-hidden="true"></div>
+        <textarea id="editor" spellcheck="false" aria-label="글 입력 편집창" placeholder="공책에 쓴 초고를 여기에 옮겨 적어 보세요.
 
 · 첫 줄에 제목을 쓰면, 제목은 빼고 점검해요.
 · 문단이 바뀌는 곳에서는 줄을 바꾸거나 한 줄을 띄어 주세요."></textarea>
+      </div>
       <div class="statbar">
         <div class="stats" id="stats"></div>
         <span class="savestate" id="saveState" role="status"></span>
@@ -1531,6 +1538,7 @@ const EMPTY2 = `<div class="empty">
 function resetResults() {
   state.s1 = state.s2 = null;
   state.done.clear();
+  if (editor) { marks = []; renderMarks(); }
   $('#result1').innerHTML = EMPTY1;
   $('#result2').innerHTML = EMPTY2;
   showTab(1);
@@ -1585,6 +1593,71 @@ function locate(start, snippet) {
   scrollEditorTo(pos);
 }
 
+/* ---------- 편집창 위 색깔 표시 ----------
+   1단계 점검 결과를 편집창 글자 바로 아래 층(#backdrop)에 칠한다.
+   학생이 글을 고치면 표시 위치를 함께 옮기고, 고친 부분의 표시는 지운다. */
+let marks = [];        // [{ id, cat, start, end }] — 지금 편집창 글 기준 위치
+let marksText = '';    // marks 위치가 맞춰져 있는 글
+
+function setMarks(issues) {
+  marks = issues.map(i => ({ id: i.id, cat: i.cat, start: i.start, end: i.end }));
+  marksText = editor.value;
+  renderMarks();
+}
+
+/** 바뀐 부분(앞뒤 공통 부분을 뺀 구간)을 찾아 표시 위치를 옮긴다. */
+function shiftMarks() {
+  const a = marksText, b = editor.value;
+  if (a === b || !marks.length) { marksText = b; return; }
+  let p = 0;
+  const min = Math.min(a.length, b.length);
+  while (p < min && a[p] === b[p]) p++;
+  let s = 0;
+  while (s < min - p && a[a.length - 1 - s] === b[b.length - 1 - s]) s++;
+  const oldEnd = a.length - s, delta = b.length - a.length;
+  marks = marks.filter(m => m.end <= p || m.start >= oldEnd).map(m => m.start >= oldEnd ? { ...m, start: m.start + delta, end: m.end + delta } : m);
+  marksText = b;
+}
+
+function visibleMarks() {
+  return marks.filter(m => state.filters.has(m.cat) && !state.done.has(m.id));
+}
+
+function renderMarks() {
+  const bd = $('#backdrop');
+  const vis = visibleMarks();
+  // 끝에 빈칸을 하나 더 넣어야 마지막 줄바꿈까지 편집창과 높이가 같아진다
+  bd.innerHTML = vis.length ? previewHTML(editor.value, vis) + ' ' : '';
+  syncBackdrop();
+}
+
+/** 편집창과 글꼴·여백·너비(스크롤 막대 제외)·스크롤 위치를 맞춘다. */
+function syncBackdrop() {
+  const bd = $('#backdrop');
+  if (!bd.firstChild) return;
+  const cs = getComputedStyle(editor);
+  ['fontFamily', 'fontSize', 'fontWeight', 'lineHeight', 'letterSpacing', 'wordSpacing', 'paddingTop', 'paddingRight', 'paddingBottom', 'paddingLeft', 'wordBreak', 'tabSize'].forEach(p => { bd.style[p] = cs[p]; });
+  bd.style.width = (editor.clientWidth + parseFloat(cs.borderLeftWidth) + parseFloat(cs.borderRightWidth)) + 'px';
+  bd.style.height = editor.offsetHeight + 'px';
+  bd.scrollTop = editor.scrollTop;
+}
+
+/** 편집창에서 표시된 곳을 누르면 오른쪽 설명 카드로 이동한다. */
+function cardAtCaret() {
+  if (!marks.length || editor.selectionStart !== editor.selectionEnd) return;
+  if (window.matchMedia('(max-width: 899px)').matches) return;   // 좁은 화면에서는 글 쓰는 중에 화면이 튀지 않게
+  const pos = editor.selectionStart;
+  const hit = visibleMarks().filter(m => m.start <= pos && pos < m.end)
+    .sort((x, y) => SENT_CATS.has(x.cat) - SENT_CATS.has(y.cat));   // 낱말 표시를 문장 표시보다 먼저
+  const card = hit.map(m => document.getElementById('card-' + m.id)).find(Boolean);
+  if (!card) return;
+  showTab(1);
+  card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  card.classList.remove('flash'); void card.offsetWidth;
+  card.classList.add('flash');
+  setTimeout(() => card.classList.remove('flash'), 1200);
+}
+
 /* ---------- 1단계 ---------- */
 function runStage1() {
   const text = editor.value;
@@ -1598,8 +1671,11 @@ function runStage1() {
   state.s1 = { text, sents, counts, opts, style, issues: computeIssues(text, sents, style) };
   state.done.clear();
   renderStage1();
+  setMarks(state.s1.issues);
   updateStats();
   $('#panel1').scrollTop = 0;
+  editor.scrollTop = 0;
+  syncBackdrop();
 }
 
 function previewHTML(text, issues) {
@@ -1672,11 +1748,10 @@ function renderStage1() {
   if (!r.issues.length) {
     html += '<div class="empty good"><b>고칠 곳을 찾지 못했어요. 👏</b><p>자동 점검이 모든 실수를 찾지는 못해요.<br>소리 내어 한 번 더 읽어 본 뒤 2단계로 넘어가세요.</p></div>';
   } else {
-    html += `<p class="summary">살펴볼 곳이 <b>${r.issues.length}</b>군데 있어요. 색깔 표시를 누르면 설명 카드로 이동해요.</p>`;
+    html += `<p class="summary">살펴볼 곳 <b>${r.issues.length}</b>군데를 <b>왼쪽 편집창</b>에 색깔로 표시했어요. 표시된 곳을 누르면 아래 설명 카드로 이동하고, 글을 고치면 그 부분의 표시가 사라져요.</p>`;
     html += '<div class="chips">' + CAT_ORDER.map(k =>
       `<button type="button" class="chip c-${k}${state.filters.has(k) ? ' on' : ''}" data-filter="${k}" aria-pressed="${state.filters.has(k)}"${cnt[k] ? '' : ' disabled'}><i></i>${CATS[k].label} <b>${cnt[k]}</b></button>`
     ).join('') + '</div>';
-    html += `<div class="preview" id="preview">${previewHTML(r.text, r.issues)}</div>`;
     html += `<ol class="cards">${r.issues.filter(i => state.filters.has(i.cat)).map(cardHTML).join('')}</ol>`;
   }
   html += `<div class="next-tip"><span class="bulb" aria-hidden="true">💡</span>
@@ -1829,7 +1904,11 @@ function init() {
     toast('점검 결과를 초기화했어요. 글은 그대로 남아 있어요.');
   });
 
-  editor.addEventListener('input', () => { updateStats(); updateSaveState(); });
+  editor.addEventListener('input', () => { shiftMarks(); renderMarks(); updateStats(); updateSaveState(); });
+  editor.addEventListener('scroll', syncBackdrop);
+  editor.addEventListener('click', cardAtCaret);
+  window.addEventListener('resize', syncBackdrop);
+  if (window.ResizeObserver) new ResizeObserver(syncBackdrop).observe(editor);
   $('#tab1').addEventListener('click', () => showTab(1));
   $('#tab2').addEventListener('click', () => showTab(2));
   $('#btnStage1').addEventListener('click', runStage1);
@@ -1883,38 +1962,29 @@ function init() {
       const k = f.dataset.filter;
       state.filters.has(k) ? state.filters.delete(k) : state.filters.add(k);
       renderStage1();
+      renderMarks();
       return;
     }
     const loc = e.target.closest('[data-locate]');
     if (loc) {
       const i = state.s1.issues.find(x => x.id === loc.dataset.locate);
-      if (i) locate(i.start, i.snippet);
+      const m = marks.find(x => x.id === loc.dataset.locate);   // 글을 고쳐 위치가 옮겨졌으면 옮겨진 위치로
+      if (i) locate(m ? m.start : i.start, i.snippet);
       return;
     }
     const go = e.target.closest('[data-goto]');
     if (go) { showTab(2); if (!$('#genre').value) $('#genre').focus(); return; }
-    const hl = e.target.closest('[data-ids]');
-    if (hl) {
-      const id = hl.dataset.ids.split(' ').find(x => document.getElementById('card-' + x));
-      const card = id && document.getElementById('card-' + id);
-      if (card) {
-        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        card.classList.add('flash');
-        setTimeout(() => card.classList.remove('flash'), 1200);
-      }
-    }
   });
   r1.addEventListener('change', e => {
     if (e.target.name === 'style') {
-      const r = state.s1;
-      r.style = e.target.value;
-      r.issues = computeIssues(r.text, r.sents, r.style);
-      state.done.clear();
-      renderStage1();
+      // 기준 문체를 바꾸면 지금 편집창의 글로 다시 점검한다
+      state.s1.style = e.target.value;
+      runStage1();
     } else if (e.target.dataset.done) {
       const id = e.target.dataset.done;
       e.target.checked ? state.done.add(id) : state.done.delete(id);
       document.getElementById('card-' + id).classList.toggle('done', e.target.checked);
+      renderMarks();
     }
   });
 
