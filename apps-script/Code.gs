@@ -72,14 +72,17 @@ function save_(title, pw, text) {
       created = true;
     }
     writeDoc_(file.getId(), text);
-    return { ok: true, title: title, created: created, updated: new Date().toISOString() };
+    const now = new Date().toISOString();
+    props_().setProperty('at:' + title, now);   // 드라이브의 '수정한 날짜'는 늦게 바뀌어서 따로 기록
+    return { ok: true, title: title, created: created, updated: now };
   });
 }
 
 function loaded_(title) {
   const file = findDoc_(getFolder_(), title);
   if (!file) return { ok: true, title: title, exists: false };
-  return { ok: true, title: title, exists: true, text: readDoc_(file.getId()), updated: file.getLastUpdated().toISOString() };
+  const updated = props_().getProperty('at:' + title) || file.getLastUpdated().toISOString();
+  return { ok: true, title: title, exists: true, text: readDoc_(file.getId()), updated: updated };
 }
 
 /* ---------- 비밀번호 ---------- */

@@ -1336,7 +1336,7 @@ function toast(msg) {
 /* ---------- 로그인·저장 (선생님 구글 드라이브) ----------
    SAVE_URL: apps-script/Code.gs 를 선생님 계정으로 '웹 앱' 배포한 뒤 받은 주소(…/exec)
    자세한 방법은 apps-script/설치안내.md 참고 */
-const SAVE_URL = '';
+const SAVE_URL = 'https://script.google.com/macros/s/AKfycbwICW7FBGXwvq8CHwK_QYt2enfADM0kmEOTPZyHAjvkAtGxp3wcjNC_HdKmFu4OwYM4sg/exec';
 const LAST_KEY = 'geultium-last';   // 이 탭에서 마지막으로 쓴 학번·이름(입력 칸 채우기용, 비밀번호는 저장하지 않음)
 let user = null;          // { id: '10101', name: '홍길동', pw: '…' } — 메모리에만 둠(새로 고침하면 다시 로그인)
 let lastSaved = null;     // 마지막으로 저장(또는 불러온) 글
