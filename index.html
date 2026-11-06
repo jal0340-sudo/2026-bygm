@@ -324,6 +324,13 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
 .tab-panel { flex: 1; min-height: 0; overflow-y: auto; padding: 16px 18px; }
 .panel-actions { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 16px; padding-bottom: 16px; border-bottom: 1px solid var(--line); }
 .panel-actions .hint { margin: 0; font-size: 13.5px; color: var(--muted); flex: 1; min-width: 200px; }
+.topic-row { flex: 1 1 100%; display: flex; align-items: center; gap: 10px; }
+.topic-row label { font-weight: 700; color: var(--navy); flex: none; }
+.topic-row input { flex: 1; min-width: 0; padding: 9px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--text); font-size: 15px; outline: none; }
+.topic-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-weak); }
+.unity-sub { margin: 0 0 10px; font-size: 14px; color: var(--muted); line-height: 1.7; }
+.unity-sub b { color: var(--navy); }
+.kw { display: inline-block; padding: 0 8px; border-radius: 999px; background: var(--teal-bg); color: var(--text); font-size: 13px; margin: 1px 0; }
 .stale { margin-bottom: 12px; padding: 10px 12px; border-radius: 10px; background: var(--warn-bg); color: var(--warn); font-size: 14px; font-weight: 600; }
 
 .empty { padding: 28px 18px; text-align: center; color: var(--muted); background: var(--soft); border-radius: 14px; }
@@ -809,6 +816,10 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
 
       <div class="tab-panel" id="panel2" role="tabpanel" aria-labelledby="tab2" hidden>
         <div class="panel-actions">
+          <div class="topic-row">
+            <label for="topic">글의 주제</label>
+            <input id="topic" maxlength="60" autocomplete="off" placeholder="예: 휴대폰 사용 시간을 스스로 정하자">
+          </div>
           <button type="button" class="btn primary" id="btnStage2">2단계 점검</button>
           <p class="hint" id="hint2">위에서 글 유형을 먼저 골라 주세요.</p>
         </div>
@@ -1547,6 +1558,165 @@ function buildContext(text) {
   return { text, full: sents, all, intro, body, concl, paras, paraCount: paras.length, byPara };
 }
 
+/* ---------- 2단계: 글의 주제와 통일성 ----------
+   주제 낱말(조사를 뗀 말)이 문장에 나오는지, 주제 문장에 함께 자주 나오는 낱말이 있는지,
+   앞 문장을 이어받는 말(이처럼·예를 들어 등)로 시작하는지를 보고 주제와 이어지는 문장인지 짐작한다. */
+const JOSA = ['으로부터', '에서부터', '에게서', '이라고', '이라는', '이지만', '에서는', '에게는', '으로는', '에서도', '에게도', '이란', '라고', '라는',
+  '에서', '에게', '한테', '께서', '으로', '부터', '까지', '처럼', '보다', '마다', '이나', '이며', '이고', '이다', '에는', '에도', '와는', '과는', '이랑',
+  '은', '는', '이', '가', '을', '를', '에', '의', '와', '과', '도', '로', '만', '께', '랑', '란'];
+const STOP = new Set(['것', '수', '등', '때', '중', '더', '또', '좀', '잘', '꼭', '안', '못', '나', '저', '너', '그', '이', '내', '제', '우리', '저희', '너희', '여러분',
+  '정말', '너무', '아주', '매우', '가장', '진짜', '또한', '그리고', '그래서', '하지만', '그러나', '따라서', '그러므로', '이처럼', '첫째', '둘째', '셋째', '넷째',
+  '마지막으로', '먼저', '다음', '다음으로', '있다', '없다', '한다', '했다', '하는', '하고', '하면', '하여', '해야', '된다', '되는', '같다', '같은', '위해', '통해',
+  '대한', '대해', '모두', '많은', '많이', '오늘', '지금', '이번', '사람', '사람들', '자신', '스스로', '다시', '함께', '알아보자', '있는', '없는', '있습니다',
+  '합니다', '했습니다', '입니다', '이런', '그런', '저런', '어떤', '모든', '각각', '여러', '하루', '하는데']);
+const STOP_PRE = ['생각', '때문', '그러', '그래', '그렇', '이렇', '저렇', '어떻', '무엇', '왜냐', '하지', '했', '합니', '해요', '입니'];
+const LINK_RE = /^\s*(이처럼|이와 같이|이렇듯|이는|이것은|이것이|그것은|그것이|이 때문|그 때문|이로 인해|그 결과|그래서|그러므로|따라서|왜냐하면|예를 들어|예를 들면|예컨대|즉|다시 말해|특히|게다가|또한|뿐만 아니라|그때|그날|그 후|그 뒤)/;
+
+function stemOf(w) {
+  w = w.replace(/[^가-힣A-Za-z0-9]/g, '');
+  for (const j of JOSA) if (w.length > j.length && w.endsWith(j)) return w.slice(0, -j.length);
+  return w;
+}
+function stemsOf(text) {
+  return [...new Set(text.split(/\s+/).filter(w => !STOP.has(w.replace(/[^가-힣A-Za-z0-9]/g, ''))).map(stemOf).filter(w => w && !STOP.has(w) && !STOP_PRE.some(p => w.startsWith(p)) && !/^\d+$/.test(w)))];
+}
+// 낱말이 서로 같은 말인지: 같거나, 앞 두 글자 이상이 같으면 같은 말로 본다 (사용 ↔ 사용하면, 집중력 ↔ 집중할)
+const sameWord = (a, b) => a === b || (Math.min(a.length, b.length) >= 2 && a.slice(0, 2) === b.slice(0, 2));
+const hasWord = (stems, keys) => keys.filter(k => stems.some(s => sameWord(s, k)));
+
+const MIND = [
+  ['고마움', /(고맙|고마|감사)/], ['미안함', /(미안|죄송|잘못|사과)/], ['사랑', /(사랑|소중)/],
+  ['축하', /(축하|기쁘|기뻤|기쁜)/], ['응원', /(응원|힘내|힘이 되|격려|믿어|믿는)/], ['그리움', /(그립|그리워|그리웠|보고 싶)/],
+];
+
+function analyzeUnity(ctx, topic) {
+  const title = ctx.full.find(s => s.isTitle);
+  const fromTitle = !topic && !!title;
+  const subject = topic || (title ? title.text : '');
+  if (!subject) return null;
+  const k0 = stemsOf(subject);
+  if (!k0.length) return null;
+  const info = ctx.all.map(s => ({ s, stems: stemsOf(s.text) }));
+  info.forEach(x => { x.direct = hasWord(x.stems, k0).length > 0; });
+  // 주제 문장에 두 번 이상 함께 나오는 낱말은 주제와 이어진 낱말로 본다
+  const cnt = new Map();
+  info.filter(x => x.direct).forEach(x => x.stems.filter(w => w.length >= 2 && !k0.some(k => sameWord(k, w))).forEach(w => cnt.set(w, (cnt.get(w) || 0) + 1)));
+  const k1 = [...cnt].filter(([, n]) => n >= 2).map(([w]) => w);
+  info.forEach((x, i) => {
+    x.related = x.direct || hasWord(x.stems, k1).length > 0;
+    // 앞 문장을 이어받는 말로 시작하거나, 앞 문장에 이어 당부하는 문장(~하자, ~합시다)은 이어진 것으로 본다
+    if (!x.related && i > 0 && info[i - 1].related && (LINK_RE.test(x.s.text) || /(자|시다|바란다|바랍니다)[.!]*$/.test(x.s.text))) x.related = true;
+  });
+  // 한 번 더: 앞뒤가 주제 문장이고, 바로 앞 문장과 낱말을 나누는 문장은 이어진 것으로 본다
+  info.forEach((x, i) => {
+    if (x.related || i === 0) return;
+    const prev = info[i - 1];
+    if (prev.related && prev.stems.some(a => x.stems.some(b => sameWord(a, b)))) x.related = true;
+  });
+  // 같은 문단에 주제 문장이 있으면, 그 문단을 맺는 당부 문장(~하자, ~합시다)도 이어진 것으로 본다
+  const paraOf = s => ctx.paras.find(p => s.start >= p.start && s.start < p.end);
+  info.forEach(x => {
+    if (x.related || !/(자|시다|바란다|바랍니다)[.!]*$/.test(x.s.text)) return;
+    const p = paraOf(x.s);
+    if (p && info.some(y => y.related && paraOf(y.s) === p)) x.related = true;
+  });
+  const long = s => s.text.replace(/\s/g, '').length >= 10;   // 인사·서명처럼 짧은 문장은 빼고 본다
+  const off = info.filter(x => !x.related && long(x.s)).map(x => x.s);
+  const inSet = (set, s) => set.some(t => t === s);
+  const relOf = s => (info.find(x => x.s === s) || {});
+  return { subject, fromTitle, k0, k1, info, off, long, inSet, relOf };
+}
+
+/** 통일성 점검 항목 (글 유형에 따라 한 가지가 달라짐) */
+function unitySection(genre, u, ctx) {
+  const directOf = list => list.filter(s => u.relOf(s).direct);
+  const items = [
+    { label: '글 전체가 주제에 맞게 쓰였나요?',
+      desc: '통일성 있는 글은 모든 내용이 하나의 주제를 향해요.',
+      custom: () => {
+        const rel = u.info.filter(x => x.related).length, all = u.info.length;
+        const dir = u.info.filter(x => x.direct).length;
+        return { ok: all > 0 && rel / all >= 0.7 && dir > 0, note: dir ? `주제와 이어진 문장: ${rel} / ${all}개` : '주제 낱말이 글에 보이지 않아요. 주제를 바르게 썼는지, 글이 주제에서 벗어나지 않았는지 살펴보세요.' };
+      },
+      guide: '주제를 다시 읽고, 글의 모든 문단이 그 주제를 말하고 있는지 확인해 보세요.' },
+    { label: '주제에서 벗어난 문장은 없나요?',
+      desc: '주제와 관계없는 이야기가 끼어들면 글의 통일성이 깨져요.',
+      custom: () => {
+        // 설명하는 글에서는 나의 느낌·생각을 밝힌 문장도 설명 대상에서 벗어난 것으로 본다
+        const mine = genre === 'explain' ? ctx.all.filter(s => /(나는|내가|저는|제가).*(같다|같습니다|같아요|생각|느꼈|느낀|싶다|싶습니다)/.test(s.text) && !u.off.includes(s)) : [];
+        const ev = [...u.off, ...mine].sort((a, b) => a.start - b.start);
+        return { ok: ev.length === 0, ev: ev.slice(0, 4),
+          note: !ev.length ? '주제와 동떨어진 문장이 보이지 않아요.'
+            : [u.off.length ? `주제와 이어지는 낱말이 잘 보이지 않는 문장이 ${u.off.length}개 있어요. 정말 주제와 관계있는지 다시 읽어 보세요.` : '',
+               mine.length ? `설명 대상이 아니라 나의 느낌·생각을 말한 문장이 ${mine.length}개 있어요.` : ''].filter(Boolean).join(' ') };
+      },
+      guide: { argue: '주장이나 근거와 관계없는 문장은 빼거나, 주장을 뒷받침하도록 고쳐 써 보세요.',
+               explain: '설명 대상과 관계없는 내용이나 나의 느낌은 빼고, 대상에 대한 사실로 바꿔 써 보세요.',
+               heart: '마음을 전하는 대상, 겪은 일, 그때의 마음과 관계없는 이야기는 빼 보세요.' }[genre] },
+  ];
+  if (ctx.paras.length >= 2) {
+    items.push({ label: '모든 문단이 주제와 이어지나요?',
+      desc: '문단마다 중심 내용이 주제와 연결되어야 해요.',
+      custom: () => {
+        const bad = ctx.paras.filter(p => {
+          const ss = u.info.filter(x => x.s.start >= p.start && x.s.start < p.end);
+          return ss.length && p.text.replace(/\s/g, '').length >= 15 && !ss.some(x => x.related);
+        });
+        const ev = bad.map(p => u.info.find(x => x.s.start >= p.start && x.s.start < p.end).s);
+        return { ok: bad.length === 0, ev: ev.slice(0, 3), note: bad.length ? `주제와 이어지지 않아 보이는 문단이 ${bad.length}개 있어요. (문단 첫 문장)` : `문단 ${ctx.paras.length}개가 모두 주제와 이어져요.` };
+      },
+      guide: '주제와 멀어진 문단은 주제와 이어지도록 중심 문장을 고치거나, 다른 문단과 합치거나 빼 보세요.' });
+  }
+  if (genre === 'argue') {
+    items.push({ label: '나의 주장이 주제와 일치하나요?',
+      desc: '주장하는 글에서는 주장 문장이 곧 글의 주제예요. 서론과 결론의 주장이 같아야 해요.',
+      custom: () => {
+        const claims = ctx.all.filter(s => CLAIM_RE.test(s.text));
+        const match = directOf(claims);
+        return { ok: match.length > 0, ev: (match.length ? match : claims).slice(0, 3),
+          note: !claims.length ? '주장 문장(~해야 한다, ~하자)을 찾지 못했어요.' : match.length ? `주제와 같은 주장 문장: ${match.length}개` : '주장 문장에 주제 낱말이 보이지 않아요. 주장이 주제와 같은지 살펴보세요.' };
+      },
+      guide: '서론의 주장 문장과 결론의 당부 문장에 주제를 그대로 담아 보세요. 근거마다 ‘그래서 ~해야 한다’로 주장과 이어지는지도 확인해요.',
+      ex: '주제가 ‘휴대폰 사용 시간을 스스로 정하자’라면 → 우리는 휴대폰 사용 시간을 스스로 정해야 한다.' });
+  } else if (genre === 'explain') {
+    items.push({ label: '처음과 끝이 같은 대상을 설명하나요?',
+      desc: '설명하는 글은 처음에 소개한 대상을 끝까지 설명하고 정리해요.',
+      custom: () => {
+        const a = directOf(ctx.intro), b = directOf(ctx.concl);
+        return { ok: a.length > 0 && b.length > 0, ev: [...a.slice(0, 1), ...b.slice(0, 1)],
+          note: `처음: ${a.length ? '주제 낱말 있음' : '주제 낱말 없음'} · 끝: ${b.length ? '주제 낱말 있음' : '주제 낱말 없음'}` };
+      },
+      guide: '처음에 설명 대상을 밝히고, 끝에서 ‘이처럼 ○○은 ~’처럼 같은 대상을 다시 불러 정리해 보세요.',
+      ex: '이처럼 백혈구는 여러 종류가 힘을 모아 우리 몸을 지킨다.' });
+  } else {
+    items.push({ label: '주제의 마음이 글에 잘 드러나나요?',
+      desc: '전하려는 마음(고마움, 미안함 등)이 겪은 일과 이어져 글 전체에 드러나야 해요.',
+      custom: () => {
+        const want = MIND.filter(([, re]) => re.test(u.subject));
+        if (want.length) {
+          const ev = ctx.all.filter(s => want.some(([, re]) => re.test(s.text)));
+          return { ok: ev.length > 0, ev: ev.slice(0, 3), note: ev.length ? `주제의 마음(${want.map(m => m[0]).join(', ')})을 담은 문장: ${ev.length}개` : `주제의 마음(${want.map(m => m[0]).join(', ')})을 나타낸 문장이 보이지 않아요.` };
+        }
+        const ev = ctx.all.filter(s => { EMO_RE.lastIndex = 0; return EMO_RE.test(s.text); });
+        const rel = ev.filter(s => u.relOf(s).related);
+        return { ok: rel.length > 0, ev: (rel.length ? rel : ev).slice(0, 3), note: rel.length ? `주제와 이어진 감정 표현 문장: ${rel.length}개` : '주제와 이어진 감정 표현을 찾지 못했어요. 주제에 전하려는 마음(예: 고마움)을 함께 쓰면 더 정확하게 점검해요.' };
+      },
+      guide: '겪은 일 바로 뒤에 그때의 마음을 쓰고, 끝에서 전하려는 마음을 한 번 더 분명하게 밝혀 보세요.',
+      ex: '그때 곁을 지켜 주신 할머니께 정말 감사드려요.' });
+  }
+  items.push({ label: '끝부분이 주제로 돌아오나요?',
+    desc: '글의 끝에서 주제를 다시 밝히면 글이 하나로 묶여요.',
+    custom: () => {
+      // 끝부분: 결론(마지막 문단)과, 서명처럼 짧은 줄을 뺀 마지막 두 문장
+      const tail = ctx.all.filter(u.long).slice(-2);
+      const end = [...new Set([...ctx.concl, ...tail])].sort((a, b) => a.start - b.start);
+      const ev = end.filter(s => u.relOf(s).related);
+      return { ok: ev.length > 0, ev: ev.slice(0, 2), note: ev.length ? '' : '끝부분에서 주제와 이어진 문장을 찾지 못했어요.' };
+    },
+    guide: { argue: '결론에서 주장을 다시 한번 강조하며 마무리해 보세요.', explain: '끝에서 설명 대상을 다시 불러 내용을 정리해 보세요.', heart: '끝에서 전하려는 마음을 다시 한번 전하며 마무리해 보세요.' }[genre] });
+  return { name: '통일성', unity: u, items };
+}
+
 function evalItem(it, ctx) {
   if (it.custom) return it.custom(ctx);
   const found = ctx[it.sec].filter(s => it.re.test(s.text));
@@ -2024,7 +2194,7 @@ function updateStats() {
   const sep = '<i class="sep"></i>';
   $('#stats').innerHTML = `<span>공백 포함 <b>${text.length}</b>자</span>${sep}<span>문장 <b>${sents.filter(s => !s.isTitle).length}</b>개</span>${sep}<span>문단 <b>${paras.length}</b>개</span>`;
   $('#stale1').hidden = !(state.s1 && state.s1.text !== text);
-  $('#stale2').hidden = !(state.s2 && state.s2.text !== text);
+  $('#stale2').hidden = !(state.s2 && (state.s2.text !== text || state.s2.topic !== $('#topic').value.trim().replace(/\s+/g, ' ')));
   updateSteps();
 }
 
@@ -2299,11 +2469,16 @@ function runStage2() {
     return;
   }
   const ctx = buildContext(text);
-  const results = CHECKLISTS[genre].sections.map(sec => ({
+  const topic = $('#topic').value.trim().replace(/\s+/g, ' ');
+  const u = analyzeUnity(ctx, topic);
+  const sections = [...CHECKLISTS[genre].sections];
+  if (u) sections.push(unitySection(genre, u, ctx));
+  const results = sections.map(sec => ({
     name: sec.name,
+    unity: sec.unity,
     items: sec.items.map(it => ({ it, res: evalItem(it, ctx) })),
   }));
-  state.s2 = { text, genre, ctx, results, checked: new Set() };
+  state.s2 = { text, genre, topic, ctx, results, checked: new Set() };
   renderStage2();
   updateStats();
   $('#panel2').scrollTop = 0;
@@ -2350,8 +2525,17 @@ function renderStage2() {
   if (!r.ctx.byPara) {
     html += `<p class="para-note">📌 문단이 ${r.ctx.paraCount}개라서 문장 순서로 ${cl.parts}을 짐작했어요. 문단이 바뀌는 곳에서 줄을 바꾸면 더 정확하게 점검할 수 있어요.</p>`;
   }
+  if (!r.results.some(sec => sec.unity)) {
+    html += `<p class="para-note">📌 위의 <b>글의 주제</b> 칸에 주제를 쓰고 다시 점검하면, 글 유형과 주제에 맞게 <b>통일성</b>도 점검해 줘요.</p>`;
+  }
   r.results.forEach(sec => {
-    html += `<section class="s2-sec"><h4>${sec.name}</h4><ul class="checks">`;
+    const u = sec.unity;
+    html += `<section class="s2-sec${u ? ' unity' : ''}"><h4>${sec.name}</h4>`;
+    if (u) {
+      const kw = [...u.k0, ...u.k1.slice(0, 6)];
+      html += `<p class="unity-sub">${u.fromTitle ? '주제 칸이 비어 있어 <b>제목</b>을 주제로 보고 점검했어요.<br>' : ''}주제: <b>“${esc(u.subject)}”</b><br>주제와 이어진 낱말: ${kw.map(w => `<span class="kw">${esc(w)}</span>`).join(' ')}</p>`;
+    }
+    html += '<ul class="checks">';
     sec.items.forEach(({ it, res }) => {
       const id = 'ck' + (n++);
       const on = r.checked.has(id);
@@ -2378,6 +2562,16 @@ function renderStage2() {
 }
 
 /* ---------- 예시 글 ---------- */
+const TOPIC_EX = {
+  argue: '예: 휴대폰 사용 시간을 스스로 정하자 (나의 주장)',
+  explain: '예: 백혈구의 종류와 하는 일 (설명할 대상)',
+  heart: '예: 아플 때 곁을 지켜 주신 할머니께 감사 (대상과 마음)',
+};
+const SAMPLE_TOPICS = {
+  argue: '휴대폰 사용 시간을 스스로 정하자',
+  explain: '백혈구의 종류와 하는 일',
+  heart: '아플 때 곁을 지켜 주신 할머니께 감사',
+};
 const SAMPLES = {
   argue: `휴대폰 사용 시간을 스스로 정하자
 
@@ -2503,11 +2697,14 @@ function init() {
   $('#tab2').addEventListener('click', () => showTab(2));
   $('#btnStage1').addEventListener('click', runStage1);
   $('#btnStage2').addEventListener('click', runStage2);
+  $('#topic').addEventListener('input', updateStats);
+  $('#topic').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); runStage2(); } });
   document.querySelectorAll('[data-rerun]').forEach(b => b.addEventListener('click', () => (b.dataset.rerun === '1' ? runStage1 : runStage2)()));
 
   $('#genre').addEventListener('change', e => {
     const v = e.target.value;
-    $('#hint2').textContent = v ? `‘${CHECKLISTS[v].label}’ 점검표로 살펴봐요.` : '위에서 글 유형을 먼저 골라 주세요.';
+    $('#hint2').textContent = v ? `‘${CHECKLISTS[v].label}’ 점검표와 주제로 살펴봐요.` : '위에서 글 유형을 먼저 골라 주세요.';
+    $('#topic').placeholder = TOPIC_EX[v] || TOPIC_EX.argue;
     if (state.s2 && v) runStage2();
     updateSteps();
   });
@@ -2518,6 +2715,7 @@ function init() {
     $('#genre').value = g;
     $('#genre').dispatchEvent(new Event('change'));
     editor.value = SAMPLES[g];
+    $('#topic').value = SAMPLE_TOPICS[g];
     updateStats();
     updateSaveState();
     toast(`‘${CHECKLISTS[g].label}’ 예시 글을 넣었어요. [1단계 점검]을 눌러 보세요.`);
