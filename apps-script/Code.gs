@@ -16,15 +16,22 @@ const EXPIRE_DAYS = 365;
 const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';   // 헷갈리는 0·O·1·I·L은 뺌
 const CODE_LEN = 6;
 const MAX_CREATE_PER_HOUR = 30;                          // 장난 개설 막기
-const URL_RE = /^https:\/\/script\.google\.com\/(a\/[^\/]+\/)?macros\/s\/[\w-]{20,}\/exec$/;
+const TEACHER_KEY = 'writingT';                         // 선생님 설정 화면 접속 코드
+const MAX_FAIL = 5;                                      // 관리 비밀번호를 이만큼 틀리면
+const LOCK_SEC = 300;                                    // 이 시간(초) 동안 막음
+const URL_RE =/^https:\/\/script\.google\.com\/(a\/[^\/]+\/)?macros\/s\/[\w-]{20,}\/exec$/;
 
 /** 요청은 모두 POST: {"action":"lookup"|"create"|"touch"|"list", ...} */
 function doPost(e) {
   try {
     const b = JSON.parse((e && e.postData && e.postData.contents) || '{}');
     if (b.action === 'lookup') return json_(lookup_(b.code));
-    if (b.action === 'create') return json_(create_(b.name, b.url));
     if (b.action === 'touch') return json_(touch_(b.code));
+    // 아래는 선생님 설정 화면에서만 쓰는 요청 (접속 코드 필요)
+    if (b.key !== TEACHER_KEY) fail_('NOKEY', '선생님 설정 접속 코드가 맞지 않아요.');
+    if (b.action === 'check') return json_({ ok: true });
+    if (b.action === 'create') return json_(create_(b.name, b.url, b.mgmt));
+    if (b.action === 'rename') return json_(rename_(b.code, b.name, b.mgmt));
     if (b.action === 'list') return json_(list_());
     throw new Error('알 수 없는 요청이에요.');
   } catch (err) {
@@ -51,10 +58,10 @@ function lookup_(code) {
 }
 
 /** 수업 개설: 겹치지 않는 수업 코드를 만들어 수업명·저장 서버 주소와 함께 보관 */
-function create_(name, url) {
-  name = String(name || '').trim().replace(/\s+/g, ' ');
+function create_(name, url, mgmt) {
+  name = cleanName_(name);
   url = String(url || '').trim();
-  if (name.length < 1 || name.length > 30 || /[\\\/:*?"<>|()]/.test(name)) fail_('BADNAME', '수업명은 30자 이하로, 괄호·특수 기호 없이 써 주세요.');
+  mgmt = cleanMgmt_(mgmt);
   if (!URL_RE.test(url)) fail_('BADURL', '저장 서버 주소가 올바르지 않아요. https://script.google.com/macros/s/…/exec 모양이어야 해요.');
   const cache = CacheService.getScriptCache();
   const made = Number(cache.get('made') || 0);
@@ -67,9 +74,26 @@ function create_(name, url) {
       for (let i = 0; i < CODE_LEN; i++) code += CODE_CHARS.charAt(Math.floor(Math.random() * CODE_CHARS.length));
     } while (props_().getProperty(key_(code)));
     const now = new Date().toISOString();
-    props_().setProperty(key_(code), JSON.stringify({ name: name, url: url, created: now, last: now }));
+    props_().setProperty(key_(code), JSON.stringify({ name: name, url: url, created: now, last: now, mgr: newHash_(mgmt) }));
     cache.put('made', String(made + 1), 3600);
     return { ok: true, code: code, name: name, created: now, expires: addDays_(now) };
+  });
+}
+
+/** 수업명 수정: 수업을 개설할 때 정한 관리 비밀번호가 맞아야 한다.
+ *  (관리 비밀번호 기능이 생기기 전에 개설된 수업은 처음 수정할 때 쓴 비밀번호로 정해짐) */
+function rename_(code, name, mgmt) {
+  code = cleanCode_(code);
+  name = cleanName_(name);
+  mgmt = cleanMgmt_(mgmt);
+  return withLock_(() => {
+    const c = read_(code);
+    if (!c || expired_(c)) fail_('NOCLASS', '없는 수업 코드예요.');
+    if (c.mgr) checkMgmt_(code, c.mgr, mgmt); else c.mgr = newHash_(mgmt);
+    const old = c.name;
+    c.name = name;
+    props_().setProperty(key_(code), JSON.stringify(c));
+    return { ok: true, code: code, name: name, oldName: old, url: c.url };
   });
 }
 
@@ -112,6 +136,36 @@ function purge_() {
     if (k.indexOf('c:') !== 0) return;
     try { if (expired_(JSON.parse(all[k]))) props_().deleteProperty(k); } catch (e) { props_().deleteProperty(k); }
   });
+}
+
+function cleanName_(name) {
+  name = String(name || '').trim().replace(/\s+/g, ' ');
+  if (name.length < 1 || name.length > 30 || /[\\\/:*?"<>|()]/.test(name)) fail_('BADNAME', '수업명은 30자 이하로, 괄호·특수 기호 없이 써 주세요.');
+  return name;
+}
+
+function cleanMgmt_(pw) {
+  pw = String(pw || '');
+  if (!/^.{4,20}$/.test(pw)) fail_('BADPW', '관리 비밀번호는 4~20자로 써 주세요.');
+  return pw;
+}
+
+function hash_(salt, pw) {
+  return Utilities.base64Encode(Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, salt + '|' + pw, Utilities.Charset.UTF_8));
+}
+function newHash_(pw) { const salt = Utilities.getUuid(); return salt + ':' + hash_(salt, pw); }
+
+function checkMgmt_(code, stored, pw) {
+  const cache = CacheService.getScriptCache();
+  const failKey = 'mfail:' + code;
+  const fails = Number(cache.get(failKey) || 0);
+  if (fails >= MAX_FAIL) fail_('LOCKED', '관리 비밀번호를 여러 번 틀렸어요. ' + Math.round(LOCK_SEC / 60) + '분 뒤에 다시 해 주세요.');
+  const i = stored.indexOf(':');
+  if (hash_(stored.slice(0, i), pw) !== stored.slice(i + 1)) {
+    cache.put(failKey, String(fails + 1), LOCK_SEC);
+    fail_('WRONG', '관리 비밀번호가 맞지 않아요. 수업을 개설할 때 정한 비밀번호를 써 주세요.');
+  }
+  cache.remove(failKey);
 }
 
 function cleanCode_(code) {

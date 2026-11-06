@@ -16,7 +16,7 @@
  * 학생 비밀번호는 원문이 아니라 해시(SHA-256 + 솔트)로만 '스크립트 속성'에 보관합니다.
  */
 
-const VERSION = 2;
+const VERSION = 3;
 const FOLDER_NAME = '글틔움';
 const LIST_DOC = '글틔움 수업 코드 목록';
 const MAX_LEN = 50000;     // 글 한 편의 최대 글자 수
@@ -29,7 +29,8 @@ function doPost(e) {
   try {
     const b = JSON.parse((e && e.postData && e.postData.contents) || '{}');
     if (b.action === 'ping') return json_(ping_(b.name));
-    if (b.action === 'bind') return json_(bind_(b.code, b.name));
+    if (b.action === 'bind') return json_(bind_(b.code, b.name, b.mgmt));
+    if (b.action === 'rename') return json_(rename_(b.code, b.name, b.mgmt));
     const cls = getClass_(b.code);
     const who = who_(b.id, b.name);
     const pw = String(b.pw || '');
@@ -57,10 +58,12 @@ function ping_(name) {
 }
 
 /** 글틔움 수업 목록에 개설된 수업 코드를 이 서버에 연결 */
-function bind_(code, name) {
+function bind_(code, name, mgmt) {
   code = cleanCode_(code);
   name = cleanName_(name);
+  mgmt = cleanMgmt_(mgmt);
   return withLock_(() => {
+    if (!props_().getProperty('mgr:' + code)) props_().setProperty('mgr:' + code, newHash_(mgmt));
     const cur = readClass_(code);
     if (cur) {
       if (cur.name !== name) fail_('CODEUSED', '이 수업 코드는 이미 다른 수업에 연결되어 있어요.');
@@ -71,6 +74,40 @@ function bind_(code, name) {
     props_().setProperty('class:' + code, JSON.stringify({ name: name, created: now, last: now }));
     writeListDoc_();
     return { ok: true, code: code, name: name };
+  });
+}
+
+/** 수업명 수정: 관리 비밀번호를 확인하고, 이미 저장된 학생 글 문서 제목도 '새 수업명(학번 이름)'으로 바꾼다 */
+function rename_(code, name, mgmt) {
+  const cls = getClass_(code);
+  name = cleanName_(name);
+  mgmt = cleanMgmt_(mgmt);
+  return withLock_(() => {
+    const stored = props_().getProperty('mgr:' + cls.code);
+    if (stored) checkSecret_('mfail:' + cls.code, stored, mgmt, 'WRONG', '관리 비밀번호가 맞지 않아요. 수업을 개설할 때 정한 비밀번호를 써 주세요.');
+    else props_().setProperty('mgr:' + cls.code, newHash_(mgmt));   // 관리 비밀번호 기능 전에 개설된 수업
+    const old = cls.name;
+    if (old === name) return { ok: true, name: name, renamed: 0 };
+    if (listClasses_().some(c => c.name === name && c.code !== cls.code)) fail_('NAMETAKEN', '이 저장 서버에 같은 이름의 수업이 이미 있어요. 다른 수업명을 써 주세요.');
+    let renamed = 0;
+    const p = props_();
+    const files = getFolder_().getFiles();
+    while (files.hasNext()) {
+      const f = files.next();
+      const t = f.getName();
+      if (f.isTrashed() || f.getMimeType() !== MimeType.GOOGLE_DOCS) continue;
+      if (t.indexOf(old + '(') !== 0 || t.slice(-1) !== ')') continue;
+      const nt = name + t.slice(old.length);
+      f.setName(nt);
+      const at = p.getProperty('at:' + t);
+      if (at) { p.setProperty('at:' + nt, at); p.deleteProperty('at:' + t); }
+      renamed++;
+    }
+    const c = readClass_(cls.code);
+    c.name = name;
+    p.setProperty('class:' + cls.code, JSON.stringify(c));
+    writeListDoc_();
+    return { ok: true, name: name, renamed: renamed };
   });
 }
 
@@ -188,8 +225,14 @@ function hash_(salt, pw) {
 function checkPw_(cls, who, pw) {
   const stored = getPw_(cls, who);
   if (!stored) fail_('NEW', '처음 로그인하는 학번·이름이에요.');
+  checkSecret_('fail:' + cls.code + ':' + who, stored, pw, 'WRONG', '비밀번호가 맞지 않아요.');
+}
+
+function newHash_(pw) { const salt = Utilities.getUuid(); return salt + ':' + hash_(salt, pw); }
+
+/** 저장된 해시(salt:hash)와 비교. 여러 번 틀리면 잠시 막는다 */
+function checkSecret_(failKey, stored, pw, code, wrongMsg) {
   const cache = CacheService.getScriptCache();
-  const failKey = 'fail:' + cls.code + ':' + who;
   const fails = Number(cache.get(failKey) || 0);
   const lockMsg = '비밀번호를 여러 번 틀렸어요. ' + Math.round(LOCK_SEC / 60) + '분 뒤에 다시 해 보세요.';
   if (fails >= MAX_FAIL) fail_('LOCKED', lockMsg);
@@ -197,9 +240,15 @@ function checkPw_(cls, who, pw) {
   if (hash_(stored.slice(0, i), pw) !== stored.slice(i + 1)) {
     cache.put(failKey, String(fails + 1), LOCK_SEC);
     const left = MAX_FAIL - fails - 1;
-    fail_('WRONG', left > 0 ? '비밀번호가 맞지 않아요. (' + left + '번 더 틀리면 잠시 막혀요)' : lockMsg);
+    fail_(code, left > 0 ? wrongMsg + ' (' + left + '번 더 틀리면 잠시 막혀요)' : lockMsg);
   }
   cache.remove(failKey);
+}
+
+function cleanMgmt_(pw) {
+  pw = String(pw || '');
+  if (!/^.{4,20}$/.test(pw)) fail_('BADPW', '관리 비밀번호는 4~20자로 써 주세요.');
+  return pw;
 }
 
 function fail_(code, msg) {

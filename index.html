@@ -195,6 +195,17 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
 /* 선생님 설정 */
 .tpage { max-width: 880px; display: flex; flex-direction: column; gap: 16px; }
 .t-card { background: var(--panel); border: 1.5px solid var(--frame); border-radius: 24px; padding: 24px 28px; box-shadow: var(--shadow); }
+.tpage-body { display: flex; flex-direction: column; gap: 16px; }
+.t-gate { max-width: 520px; width: 100%; margin: 24px auto; text-align: center; }
+.t-gate .t-lead { margin-bottom: 16px; }
+.t-gate-form { display: flex; gap: 8px; justify-content: center; }
+.t-gate-form input { flex: 1; max-width: 260px; padding: 11px 14px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--panel); font-size: 16px; color: var(--text); outline: none; }
+.t-gate-form input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-weak); }
+.t-gate .t-msg { margin-top: 10px; }
+.t-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.t-code-pair { grid-template-columns: 140px minmax(0, 1fr); align-items: center; }
+.t-codein { text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
+.t-codein::placeholder { letter-spacing: 0; font-weight: 400; }
 .t-intro { display: flex; align-items: flex-start; gap: 18px; background: linear-gradient(110deg, #fff9ef 0%, #fdf0dc 60%, #f7e2c2 100%); }
 @media (prefers-color-scheme: dark) { .t-intro { background: linear-gradient(110deg, #2a241d 0%, #33291c 100%); } }
 .t-intro > div { flex: 1; }
@@ -614,6 +625,17 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
 
   <!-- ================= 선생님 설정: 수업 개설 ================= -->
   <main class="home tpage" id="teacherMain" hidden>
+    <section class="t-card t-gate" id="teacherGate">
+      <h1 class="t-title">선생님 설정</h1>
+      <p class="t-lead">선생님만 들어올 수 있어요. <b>선생님 설정 접속 코드</b>를 써 주세요.</p>
+      <form class="t-gate-form" id="gateForm" autocomplete="off" novalidate>
+        <input id="gateCode" type="password" maxlength="40" placeholder="접속 코드" aria-label="선생님 설정 접속 코드">
+        <button type="submit" class="btn primary">들어가기</button>
+      </form>
+      <p class="t-msg" id="gateMsg" role="status"></p>
+    </section>
+
+    <div class="tpage-body" id="teacherBody" hidden>
     <section class="t-card t-intro">
       <div>
         <h1 class="t-title">선생님 설정 <small>수업 개설</small></h1>
@@ -643,7 +665,12 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
         <input id="newClassName" maxlength="30" placeholder="예: 2학년 3반 국어">
         <label for="serverUrl">저장 서버 주소 <span class="muted">(웹 앱 URL)</span></label>
         <input id="serverUrl" inputmode="url" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec">
-        <p class="t-help">수업 코드는 다른 수업과 겹치지 않게 <b>자동으로 만들어져요.</b></p>
+        <label for="mgmtPw">관리 비밀번호</label>
+        <div class="t-pair">
+          <input id="mgmtPw" type="password" maxlength="20" autocomplete="new-password" placeholder="4~20자">
+          <input id="mgmtPw2" type="password" maxlength="20" autocomplete="new-password" placeholder="한 번 더" aria-label="관리 비밀번호 확인">
+        </div>
+        <p class="t-help">수업 코드는 다른 수업과 겹치지 않게 <b>자동으로 만들어져요.</b> 관리 비밀번호는 나중에 <b>수업명을 바꿀 때</b> 필요해요. 개설한 선생님만 알고 있도록 잘 기억해 두세요.</p>
         <button type="submit" class="btn primary" id="btnCreate">수업 개설하고 코드 받기</button>
         <p class="t-msg" id="classMsg" role="status"></p>
       </form>
@@ -663,9 +690,29 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
           <li><b>1년 동안 이 수업 코드로 새로 저장되는 글(파일)이 없으면, 수업과 수업 코드가 자동으로 삭제되고 연결된 선생님 계정도 연결이 해제돼요.</b> 학생이 글을 저장할 때마다 1년이 새로 시작돼요.</li>
           <li>자동 삭제되어도 이미 저장된 학생 글 문서는 선생님 드라이브에 그대로 남아요. 같은 수업을 다시 쓰려면 새로 개설해 새 코드를 받으면 돼요.</li>
           <li>한 번 개설된 수업은 다른 선생님이 지울 수 없어요. 대신 [개설된 수업 보기]에서 어떤 수업이 개설되어 있는지 확인할 수 있어요.</li>
+          <li>수업명은 개설한 선생님만 아래 3번에서 관리 비밀번호로 바꿀 수 있어요.</li>
         </ul>
       </div>
     </section>
+
+    <section class="t-card">
+      <h2><span class="t-num">3</span>수업명 바꾸기 <small>개설한 선생님만</small></h2>
+      <form class="t-form" id="renameForm" autocomplete="off" novalidate>
+        <label for="rnCode">수업 코드</label>
+        <div class="t-pair t-code-pair">
+          <input id="rnCode" maxlength="6" spellcheck="false" autocapitalize="characters" placeholder="6자리" class="t-codein">
+          <span class="code-class" id="rnCurrent" aria-live="polite">개설할 때 받은 수업 코드</span>
+        </div>
+        <label for="rnName">새 수업명</label>
+        <input id="rnName" maxlength="30" placeholder="예: 2학년 3반 국어 심화">
+        <label for="rnPw">관리 비밀번호</label>
+        <input id="rnPw" type="password" maxlength="20" autocomplete="off" placeholder="수업을 개설할 때 정한 비밀번호">
+        <p class="t-help">수업명을 바꾸면 학생 로그인 화면의 수업명과, 이미 저장된 학생 글 문서 제목(<b>새 수업명(학번 이름)</b>)도 함께 바뀌어요. 수업 코드는 그대로예요.</p>
+        <button type="submit" class="btn primary" id="btnRename">수업명 바꾸기</button>
+        <p class="t-msg" id="renameMsg" role="status"></p>
+      </form>
+    </section>
+    </div>
   </main>
 </div>
 
@@ -1704,8 +1751,55 @@ function logout() {
   toast('로그아웃했어요.');
 }
 
+/* ---------- 선생님 설정: 접속 코드 ----------
+   화면에서는 코드의 해시만 비교하고, 실제 수업 개설·목록·수업명 수정 요청은 수업 목록 서버가 코드를 다시 확인한다. */
+const TEACHER_KEY_HASH = '99284c9b4a1ff30813a8127c8235bed7714c34db978eee68f29a914751994edc';
+const TKEY = 'geultium-teacher';
+let teacherKey = (() => { try { return sessionStorage.getItem(TKEY) || ''; } catch (e) { return ''; } })();
+
+async function sha256hex(s) {
+  const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(s));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+function setTeacherKey(k) {
+  teacherKey = k;
+  try { k ? sessionStorage.setItem(TKEY, k) : sessionStorage.removeItem(TKEY); } catch (e) {}
+  showTeacherGate();
+}
+
+function showTeacherGate() {
+  $('#teacherGate').hidden = !!teacherKey;
+  $('#teacherBody').hidden = !teacherKey;
+  if (teacherKey) loadServerCode().catch(() => {});
+}
+
+async function unlockTeacher(e) {
+  e.preventDefault();
+  const v = $('#gateCode').value.trim();
+  const msg = $('#gateMsg');
+  if (!v) { msg.textContent = '접속 코드를 써 주세요.'; return; }
+  if (await sha256hex(v) !== TEACHER_KEY_HASH) {
+    msg.textContent = '접속 코드가 맞지 않아요.';
+    $('#gateCode').select();
+    return;
+  }
+  msg.textContent = '';
+  $('#gateCode').value = '';
+  setTeacherKey(v);
+  window.scrollTo(0, 0);
+}
+
+/** 선생님 설정 요청: 접속 코드를 함께 보내고, 코드가 틀렸다고 하면 다시 잠근다 */
+async function callTeacher(body) {
+  try { return await callServer(REGISTRY_URL, { ...body, key: teacherKey }); } catch (err) {
+    if (err.code === 'NOKEY') { setTeacherKey(''); toast('접속 코드를 다시 써 주세요.'); }
+    throw err;
+  }
+}
+
 /* ---------- 선생님 설정: 수업 개설 ---------- */
-let serverCode = null;     // 저장 서버 코드(save-server/Code.gs) — 선생님 설정 화면에 들어오면 미리 받아 둔다
+let serverCode = null;    // 저장 서버 코드(save-server/Code.gs) — 선생님 설정 화면에 들어오면 미리 받아 둔다
 let pendingBind = null;    // 수업 코드는 받았지만 저장 서버 연결에 실패한 수업
 function loadServerCode() {
   if (!serverCode) serverCode = fetch(SERVER_CODE_URL, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(); return r.text(); }).catch(e => { serverCode = null; throw e; });
@@ -1734,6 +1828,9 @@ async function createClass(e) {
   if (!name) { msg.textContent = '수업명을 써 주세요.'; $('#newClassName').focus(); return; }
   if (/[\\\/:*?"<>|()]/.test(name)) { msg.textContent = '수업명에는 괄호나 \\ / : * ? " < > | 같은 기호를 쓸 수 없어요.'; $('#newClassName').focus(); return; }
   if (!SERVER_URL_RE.test(url)) { msg.textContent = '저장 서버 주소는 https://script.google.com/macros/s/…/exec 모양이어야 해요. 배포할 때 나온 ‘웹 앱 URL’을 붙여 넣어 주세요.'; $('#serverUrl').focus(); return; }
+  const mgmt = $('#mgmtPw').value;
+  if (mgmt.length < 4) { msg.textContent = '관리 비밀번호를 4자 이상 정해 주세요.'; $('#mgmtPw').focus(); return; }
+  if ($('#mgmtPw2').value !== mgmt) { msg.textContent = '두 관리 비밀번호가 서로 달라요.'; $('#mgmtPw2').focus(); return; }
   const btn = $('#btnCreate');
   btn.disabled = true;
   msg.className = 't-msg ok';
@@ -1746,10 +1843,12 @@ async function createClass(e) {
         : err.message);
     }
     if (p.service !== '글틔움 저장 서버') throw new Error('글틔움 저장 서버 주소가 아니에요. 1번 안내대로 만든 웹 앱 URL을 붙여 넣어 주세요.');
+    if ((p.version || 0) < 3) throw new Error(OLD_SERVER_MSG);
     if (p.nameTaken) throw new Error('이 저장 서버에 같은 이름의 수업이 이미 있어요. 수업명을 조금 바꿔 주세요. (예: 2학년 3반 국어 2027)');
     msg.textContent = '수업 코드를 만드는 중…';
-    const r = await callServer(REGISTRY_URL, { action: 'create', name, url });
-    pendingBind = { code: r.code, name: r.name, url };
+    const r = await callTeacher({ action: 'create', name, url, mgmt });
+    pendingBind = { code: r.code, name: r.name, url, mgmt };
+    $('#mgmtPw').value = $('#mgmtPw2').value = '';
     $('#resName').textContent = r.name;
     $('#resCode').textContent = r.code;
     $('#resExpire').textContent = ymd(r.expires);
@@ -1770,9 +1869,9 @@ async function createClass(e) {
 /** 수업 목록에 등록된 수업 코드를 선생님 저장 서버에 연결한다 (실패하면 [다시 연결하기]) */
 async function bindClass() {
   if (!pendingBind) return;
-  const { code, name, url } = pendingBind;
+  const { code, name, url, mgmt } = pendingBind;
   try {
-    await callServer(url, { action: 'bind', code, name });
+    await callServer(url, { action: 'bind', code, name, mgmt });
     pendingBind = null;
     $('#resBindFail').hidden = true;
     return true;
@@ -1783,12 +1882,73 @@ async function bindClass() {
   }
 }
 
+const OLD_SERVER_MSG = '저장 서버 코드가 예전 버전이에요. [저장 서버 코드 복사]로 새 코드를 받아 Apps Script 편집기에 덮어 붙여 넣고 저장한 뒤, [배포] → [배포 관리] → 연필 → 버전: 새 버전 → [배포]를 눌러 주세요. (주소는 그대로예요)';
+
+/* ---------- 선생님 설정: 수업명 바꾸기 (관리 비밀번호 필요) ---------- */
+async function lookupRename() {
+  const inp = $('#rnCode');
+  const out = $('#rnCurrent');
+  const code = inp.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (inp.value !== code) inp.value = code;
+  const seq = lookupRename.seq = (lookupRename.seq || 0) + 1;
+  out.className = 'code-class';
+  if (code.length < 6) { out.textContent = code ? '6자리를 모두 써 주세요' : '개설할 때 받은 수업 코드'; return; }
+  out.textContent = '수업을 찾는 중…';
+  try {
+    const d = await callServer(REGISTRY_URL, { action: 'lookup', code });
+    if (seq !== lookupRename.seq) return;
+    out.textContent = '지금 수업명: ' + d.name;
+    out.classList.add('ok');
+  } catch (err) {
+    if (seq !== lookupRename.seq) return;
+    out.textContent = err.message;
+    out.classList.add('bad');
+  }
+}
+
+async function renameClass(e) {
+  e.preventDefault();
+  const msg = $('#renameMsg');
+  const code = $('#rnCode').value.trim().toUpperCase();
+  const name = $('#rnName').value.trim().replace(/\s+/g, ' ');
+  const mgmt = $('#rnPw').value;
+  msg.className = 't-msg';
+  if (code.length !== 6) { msg.textContent = '수업 코드 6자리를 써 주세요.'; $('#rnCode').focus(); return; }
+  if (!name) { msg.textContent = '새 수업명을 써 주세요.'; $('#rnName').focus(); return; }
+  if (/[\\\/:*?"<>|()]/.test(name)) { msg.textContent = '수업명에는 괄호나 \\ / : * ? " < > | 같은 기호를 쓸 수 없어요.'; $('#rnName').focus(); return; }
+  if (mgmt.length < 4) { msg.textContent = '관리 비밀번호를 써 주세요.'; $('#rnPw').focus(); return; }
+  const btn = $('#btnRename');
+  btn.disabled = true;
+  msg.className = 't-msg ok';
+  msg.textContent = '관리 비밀번호를 확인하는 중…';
+  try {
+    const r = await callTeacher({ action: 'rename', code, name, mgmt });
+    msg.textContent = '저장 서버의 수업명과 학생 글 문서 제목을 바꾸는 중…';
+    let s;
+    try { s = await callServer(r.url, { action: 'rename', code, name, mgmt }); } catch (err) {
+      if (err.message === '알 수 없는 요청이에요.') throw new Error('수업 목록의 수업명은 바뀌었지만, ' + OLD_SERVER_MSG + ' 그다음 여기서 한 번 더 [수업명 바꾸기]를 눌러 주세요.');
+      if (err.code === 'NET' || err.code === 'BADSERVER') throw new Error('수업 목록의 수업명은 바뀌었지만 저장 서버에 연결하지 못했어요. 잠시 뒤 한 번 더 눌러 주세요.');
+      throw err;
+    }
+    lookupCache.delete(code);
+    $('#rnPw').value = '';
+    msg.textContent = `수업명을 ‘${name}’(으)로 바꿨어요.` + (s.renamed ? ` 이미 저장된 학생 글 문서 ${s.renamed}개의 제목도 바꿨어요.` : '');
+    lookupRename();
+  } catch (err) {
+    msg.className = 't-msg';
+    msg.textContent = err.message;
+    if (err.code === 'WRONG') { $('#rnPw').value = ''; $('#rnPw').focus(); }
+  } finally {
+    btn.disabled = false;
+  }
+}
+
 async function showClassList() {
   const box = $('#classList');
   box.innerHTML = '<p class="empty">개설된 수업을 불러오는 중…</p>';
   $('#listDialog').showModal();
   try {
-    const d = await callServer(REGISTRY_URL, { action: 'list' });
+    const d = await callTeacher({ action: 'list' });
     if (!d.classes.length) { box.innerHTML = '<p class="empty">아직 개설된 수업이 없어요.</p>'; return; }
     box.innerHTML = `<table><thead><tr><th>수업명</th><th>수업 코드</th><th>개설일</th><th>마지막 저장</th><th>자동 삭제 예정</th></tr></thead><tbody>${
       d.classes.map(c => `<tr><td>${esc(c.name)}</td><td class="mono">${esc(c.code)}</td><td>${ymd(c.created)}</td><td>${c.last === c.created ? '아직 없음' : ymd(c.last)}</td><td>${ymd(c.expires)}</td></tr>`).join('')
@@ -1861,7 +2021,7 @@ function route() {
   document.title = work ? '글다듬기 – 글틔움' : teacher ? '선생님 설정 – 글틔움' : '글틔움';
   const nav = location.hash === '#guide' ? 'guide' : teacher ? 'teacher' : 'home';
   document.querySelectorAll('[data-nav]').forEach(a => a.classList.toggle('on', a.dataset.nav === nav));
-  if (teacher) { loadServerCode().catch(() => {}); window.scrollTo(0, 0); }
+  if (teacher) { showTeacherGate(); window.scrollTo(0, 0); if (!teacherKey) setTimeout(() => $('#gateCode').focus(), 0); }
   else if (work) { window.scrollTo(0, 0); updateSteps(); }
   else if (location.hash === '#guide') $('#guide').scrollIntoView({ behavior: 'smooth' });
   else window.scrollTo(0, 0);
@@ -2195,8 +2355,11 @@ function init() {
   $('#qrClose').addEventListener('click', () => qr.close());
   qr.addEventListener('click', e => { if (e.target === qr) qr.close(); });
 
-  // 선생님 설정: 수업 개설
+  // 선생님 설정: 접속 코드 · 수업 개설 · 수업명 바꾸기
+  $('#gateForm').addEventListener('submit', unlockTeacher);
   $('#classForm').addEventListener('submit', createClass);
+  $('#renameForm').addEventListener('submit', renameClass);
+  $('#rnCode').addEventListener('input', () => { clearTimeout(lookupRename.timer); lookupRename.timer = setTimeout(lookupRename, 250); });
   $('#btnCopyServer').addEventListener('click', async () => {
     try {
       const code = await loadServerCode();
