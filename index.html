@@ -203,7 +203,11 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
 .t-gate-form input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-weak); }
 .t-gate .t-msg { margin-top: 10px; }
 .t-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.t-code-pair { grid-template-columns: 140px minmax(0, 1fr); align-items: center; }
+.t-pick { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+.t-pick label { font-weight: 700; color: var(--navy); font-size: 14px; }
+.t-pick select { padding: 8px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--panel); color: var(--text); font-size: 15px; max-width: 100%; }
+.t-result .t-form { margin: 12px 0 8px; padding-top: 14px; border-top: 1px dashed var(--ok); }
+.t-result .t-form .t-help, .t-result .t-form .t-msg { margin: 0; }
 .t-codein { text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
 .t-codein::placeholder { letter-spacing: 0; font-weight: 400; }
 .t-intro { display: flex; align-items: flex-start; gap: 18px; background: linear-gradient(110deg, #fff9ef 0%, #fdf0dc 60%, #f7e2c2 100%); }
@@ -670,7 +674,7 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
           <input id="mgmtPw" type="password" maxlength="20" autocomplete="new-password" placeholder="4~20자">
           <input id="mgmtPw2" type="password" maxlength="20" autocomplete="new-password" placeholder="한 번 더" aria-label="관리 비밀번호 확인">
         </div>
-        <p class="t-help">수업 코드는 다른 수업과 겹치지 않게 <b>자동으로 만들어져요.</b> 관리 비밀번호는 나중에 <b>수업명을 바꿀 때</b> 필요해요. 개설한 선생님만 알고 있도록 잘 기억해 두세요.</p>
+        <p class="t-help">수업 코드는 다른 수업과 겹치지 않게 <b>자동으로 만들어져요.</b> 관리 비밀번호는 나중에 <b>수업 코드를 확인하거나 수업명을 바꿀 때</b> 필요해요. 개설한 선생님만 알고 있도록 잘 기억해 두세요.</p>
         <button type="submit" class="btn primary" id="btnCreate">수업 개설하고 코드 받기</button>
         <p class="t-msg" id="classMsg" role="status"></p>
       </form>
@@ -690,27 +694,39 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
           <li><b>1년 동안 이 수업 코드로 새로 저장되는 글(파일)이 없으면, 수업과 수업 코드가 자동으로 삭제되고 연결된 선생님 계정도 연결이 해제돼요.</b> 학생이 글을 저장할 때마다 1년이 새로 시작돼요.</li>
           <li>자동 삭제되어도 이미 저장된 학생 글 문서는 선생님 드라이브에 그대로 남아요. 같은 수업을 다시 쓰려면 새로 개설해 새 코드를 받으면 돼요.</li>
           <li>한 번 개설된 수업은 다른 선생님이 지울 수 없어요. 대신 [개설된 수업 보기]에서 어떤 수업이 개설되어 있는지 확인할 수 있어요.</li>
-          <li>수업명은 개설한 선생님만 아래 3번에서 관리 비밀번호로 바꿀 수 있어요.</li>
+          <li>수업 코드를 잊었거나 수업명을 바꾸고 싶으면 아래 3번에서 수업명과 관리 비밀번호로 확인할 수 있어요. (개설한 선생님만)</li>
         </ul>
       </div>
     </section>
 
     <section class="t-card">
-      <h2><span class="t-num">3</span>수업명 바꾸기 <small>개설한 선생님만</small></h2>
-      <form class="t-form" id="renameForm" autocomplete="off" novalidate>
-        <label for="rnCode">수업 코드</label>
-        <div class="t-pair t-code-pair">
-          <input id="rnCode" maxlength="6" spellcheck="false" autocapitalize="characters" placeholder="6자리" class="t-codein">
-          <span class="code-class" id="rnCurrent" aria-live="polite">개설할 때 받은 수업 코드</span>
-        </div>
-        <label for="rnName">새 수업명</label>
-        <input id="rnName" maxlength="30" placeholder="예: 2학년 3반 국어 심화">
-        <label for="rnPw">관리 비밀번호</label>
-        <input id="rnPw" type="password" maxlength="20" autocomplete="off" placeholder="수업을 개설할 때 정한 비밀번호">
-        <p class="t-help">수업명을 바꾸면 학생 로그인 화면의 수업명과, 이미 저장된 학생 글 문서 제목(<b>새 수업명(학번 이름)</b>)도 함께 바뀌어요. 수업 코드는 그대로예요.</p>
-        <button type="submit" class="btn primary" id="btnRename">수업명 바꾸기</button>
-        <p class="t-msg" id="renameMsg" role="status"></p>
+      <h2><span class="t-num">3</span>수업 코드 확인 및 수업명 수정 <small>개설한 선생님만</small></h2>
+      <form class="t-form" id="findForm" autocomplete="off" novalidate>
+        <label for="fdName">수업명</label>
+        <input id="fdName" maxlength="30" placeholder="개설할 때 쓴 수업명 (예: 2학년 3반 국어)">
+        <label for="fdPw">관리 비밀번호</label>
+        <input id="fdPw" type="password" maxlength="20" autocomplete="off" placeholder="수업을 개설할 때 정한 비밀번호">
+        <p class="t-help">수업명과 관리 비밀번호가 맞으면 그 수업의 <b>수업 코드</b>를 보여 주고, 수업명을 바꿀 수 있어요.</p>
+        <button type="submit" class="btn primary" id="btnFind">수업 코드 확인</button>
+        <p class="t-msg" id="findMsg" role="status"></p>
       </form>
+
+      <div class="t-result" id="findResult" hidden>
+        <div class="t-pick" id="fdPickRow" hidden>
+          <label for="fdPick">같은 이름의 수업이 여러 개예요</label>
+          <select id="fdPick"></select>
+        </div>
+        <div class="t-code"><span class="t-code-label">수업 코드</span><b id="fdCode"></b><button type="button" class="btn small" id="btnCopyFound"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg>코드 복사</button></div>
+        <p class="muted" id="fdInfo"></p>
+        <form class="t-form" id="renameForm" autocomplete="off" novalidate>
+          <label for="rnName">새 수업명</label>
+          <input id="rnName" maxlength="30" placeholder="예: 2학년 3반 국어 심화">
+          <p class="t-help">수업명을 바꾸면 학생 로그인 화면의 수업명과, 이미 저장된 학생 글 문서 제목(<b>새 수업명(학번 이름)</b>)도 함께 바뀌어요. 수업 코드는 그대로예요.</p>
+          <button type="submit" class="btn primary" id="btnRename">수업명 바꾸기</button>
+          <p class="t-msg" id="renameMsg" role="status"></p>
+        </form>
+        <button type="button" class="linkbtn" id="btnFindAgain">다른 수업 확인하기</button>
+      </div>
     </section>
     </div>
   </main>
@@ -1884,43 +1900,75 @@ async function bindClass() {
 
 const OLD_SERVER_MSG = '저장 서버 코드가 예전 버전이에요. [저장 서버 코드 복사]로 새 코드를 받아 Apps Script 편집기에 덮어 붙여 넣고 저장한 뒤, [배포] → [배포 관리] → 연필 → 버전: 새 버전 → [배포]를 눌러 주세요. (주소는 그대로예요)';
 
-/* ---------- 선생님 설정: 수업명 바꾸기 (관리 비밀번호 필요) ---------- */
-async function lookupRename() {
-  const inp = $('#rnCode');
-  const out = $('#rnCurrent');
-  const code = inp.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
-  if (inp.value !== code) inp.value = code;
-  const seq = lookupRename.seq = (lookupRename.seq || 0) + 1;
-  out.className = 'code-class';
-  if (code.length < 6) { out.textContent = code ? '6자리를 모두 써 주세요' : '개설할 때 받은 수업 코드'; return; }
-  out.textContent = '수업을 찾는 중…';
+/* ---------- 선생님 설정: 수업 코드 확인 및 수업명 수정 (관리 비밀번호 필요) ---------- */
+let found = null;    // { classes:[{code,name,created,expires}], mgmt }
+const foundClass = () => found && found.classes[Number($('#fdPick').value) || 0];
+
+function showFound() {
+  const c = foundClass();
+  if (!c) return;
+  $('#fdCode').textContent = c.code;
+  $('#fdInfo').textContent = `수업명: ${c.name} · 개설일: ${ymd(c.created)} · 자동 삭제 예정일: ${ymd(c.expires)}`;
+}
+
+function resetFind() {
+  found = null;
+  $('#findResult').hidden = true;
+  $('#findForm').hidden = false;
+  $('#fdPw').value = $('#rnName').value = '';
+  $('#findMsg').textContent = $('#renameMsg').textContent = '';
+  $('#fdName').focus();
+}
+
+async function findClass(e) {
+  e.preventDefault();
+  const msg = $('#findMsg');
+  const name = $('#fdName').value.trim().replace(/\s+/g, ' ');
+  const mgmt = $('#fdPw').value;
+  msg.className = 't-msg';
+  if (!name) { msg.textContent = '수업명을 써 주세요.'; $('#fdName').focus(); return; }
+  if (mgmt.length < 4) { msg.textContent = '관리 비밀번호를 써 주세요.'; $('#fdPw').focus(); return; }
+  const btn = $('#btnFind');
+  btn.disabled = true;
+  msg.className = 't-msg ok';
+  msg.textContent = '수업을 찾는 중…';
   try {
-    const d = await callServer(REGISTRY_URL, { action: 'lookup', code });
-    if (seq !== lookupRename.seq) return;
-    out.textContent = '지금 수업명: ' + d.name;
-    out.classList.add('ok');
+    const r = await callTeacher({ action: 'find', name, mgmt });
+    found = { classes: r.classes, mgmt };
+    const pick = $('#fdPick');
+    pick.innerHTML = '';
+    r.classes.forEach((c, i) => pick.add(new Option(`${c.name} (개설일 ${ymd(c.created)})`, i)));
+    $('#fdPickRow').hidden = r.classes.length < 2;
+    showFound();
+    $('#fdPw').value = '';
+    msg.textContent = '';
+    $('#renameMsg').textContent = '';
+    $('#findForm').hidden = true;
+    $('#findResult').hidden = false;
   } catch (err) {
-    if (seq !== lookupRename.seq) return;
-    out.textContent = err.message;
-    out.classList.add('bad');
+    msg.className = 't-msg';
+    msg.textContent = err.message;
+    if (err.code === 'WRONG') { $('#fdPw').value = ''; $('#fdPw').focus(); }
+  } finally {
+    btn.disabled = false;
   }
 }
 
 async function renameClass(e) {
   e.preventDefault();
   const msg = $('#renameMsg');
-  const code = $('#rnCode').value.trim().toUpperCase();
+  const c = foundClass();
+  if (!c) { resetFind(); return; }
+  const code = c.code, mgmt = found.mgmt;
   const name = $('#rnName').value.trim().replace(/\s+/g, ' ');
-  const mgmt = $('#rnPw').value;
   msg.className = 't-msg';
-  if (code.length !== 6) { msg.textContent = '수업 코드 6자리를 써 주세요.'; $('#rnCode').focus(); return; }
   if (!name) { msg.textContent = '새 수업명을 써 주세요.'; $('#rnName').focus(); return; }
   if (/[\\\/:*?"<>|()]/.test(name)) { msg.textContent = '수업명에는 괄호나 \\ / : * ? " < > | 같은 기호를 쓸 수 없어요.'; $('#rnName').focus(); return; }
-  if (mgmt.length < 4) { msg.textContent = '관리 비밀번호를 써 주세요.'; $('#rnPw').focus(); return; }
+  if (name === c.name) { msg.textContent = '지금 수업명과 같아요. 새 수업명을 써 주세요.'; $('#rnName').focus(); return; }
   const btn = $('#btnRename');
   btn.disabled = true;
   msg.className = 't-msg ok';
-  msg.textContent = '관리 비밀번호를 확인하는 중…';
+  msg.textContent = '수업명을 바꾸는 중…';
   try {
     const r = await callTeacher({ action: 'rename', code, name, mgmt });
     msg.textContent = '저장 서버의 수업명과 학생 글 문서 제목을 바꾸는 중…';
@@ -1931,13 +1979,14 @@ async function renameClass(e) {
       throw err;
     }
     lookupCache.delete(code);
-    $('#rnPw').value = '';
+    c.name = name;
+    $('#fdPick').selectedOptions[0].textContent = `${name} (개설일 ${ymd(c.created)})`;
+    showFound();
+    $('#rnName').value = '';
     msg.textContent = `수업명을 ‘${name}’(으)로 바꿨어요.` + (s.renamed ? ` 이미 저장된 학생 글 문서 ${s.renamed}개의 제목도 바꿨어요.` : '');
-    lookupRename();
   } catch (err) {
     msg.className = 't-msg';
     msg.textContent = err.message;
-    if (err.code === 'WRONG') { $('#rnPw').value = ''; $('#rnPw').focus(); }
   } finally {
     btn.disabled = false;
   }
@@ -2355,11 +2404,16 @@ function init() {
   $('#qrClose').addEventListener('click', () => qr.close());
   qr.addEventListener('click', e => { if (e.target === qr) qr.close(); });
 
-  // 선생님 설정: 접속 코드 · 수업 개설 · 수업명 바꾸기
+  // 선생님 설정: 접속 코드 · 수업 개설 · 수업 코드 확인 및 수업명 수정
   $('#gateForm').addEventListener('submit', unlockTeacher);
   $('#classForm').addEventListener('submit', createClass);
+  $('#findForm').addEventListener('submit', findClass);
   $('#renameForm').addEventListener('submit', renameClass);
-  $('#rnCode').addEventListener('input', () => { clearTimeout(lookupRename.timer); lookupRename.timer = setTimeout(lookupRename, 250); });
+  $('#fdPick').addEventListener('change', () => { showFound(); $('#renameMsg').textContent = ''; });
+  $('#btnFindAgain').addEventListener('click', resetFind);
+  $('#btnCopyFound').addEventListener('click', async () => {
+    if (await copyText($('#fdCode').textContent)) toast('수업 코드를 복사했어요.');
+  });
   $('#btnCopyServer').addEventListener('click', async () => {
     try {
       const code = await loadServerCode();

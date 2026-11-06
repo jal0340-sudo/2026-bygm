@@ -31,6 +31,7 @@ function doPost(e) {
     if (b.key !== TEACHER_KEY) fail_('NOKEY', '선생님 설정 접속 코드가 맞지 않아요.');
     if (b.action === 'check') return json_({ ok: true });
     if (b.action === 'create') return json_(create_(b.name, b.url, b.mgmt));
+    if (b.action === 'find') return json_(find_(b.name, b.mgmt));
     if (b.action === 'rename') return json_(rename_(b.code, b.name, b.mgmt));
     if (b.action === 'list') return json_(list_());
     throw new Error('알 수 없는 요청이에요.');
@@ -78,6 +79,37 @@ function create_(name, url, mgmt) {
     cache.put('made', String(made + 1), 3600);
     return { ok: true, code: code, name: name, created: now, expires: addDays_(now) };
   });
+}
+
+/** 수업 코드 확인: 수업명과 관리 비밀번호가 맞는 수업의 코드를 알려 준다 (같은 이름·비밀번호면 여러 개) */
+function find_(name, mgmt) {
+  name = cleanName_(name);
+  mgmt = cleanMgmt_(mgmt);
+  const cache = CacheService.getScriptCache();
+  const failKey = 'nfail:' + Utilities.base64EncodeWebSafe(name);
+  const fails = Number(cache.get(failKey) || 0);
+  if (fails >= MAX_FAIL) fail_('LOCKED', '관리 비밀번호를 여러 번 틀렸어요. ' + Math.round(LOCK_SEC / 60) + '분 뒤에 다시 해 주세요.');
+  const all = props_().getProperties();
+  let named = 0;
+  const found = [];
+  Object.keys(all).forEach(k => {
+    if (k.indexOf('c:') !== 0) return;
+    let c;
+    try { c = JSON.parse(all[k]); } catch (e) { return; }
+    if (c.name !== name || expired_(c)) return;
+    named++;
+    if (!c.mgr) return;
+    const i = c.mgr.indexOf(':');
+    if (hash_(c.mgr.slice(0, i), mgmt) === c.mgr.slice(i + 1)) found.push({ code: k.slice(2), name: c.name, created: c.created, expires: addDays_(c.last) });
+  });
+  if (!named) fail_('NOCLASS', '그 수업명으로 개설된 수업이 없어요. 개설할 때 쓴 수업명을 그대로 써 주세요.');
+  if (!found.length) {
+    cache.put(failKey, String(fails + 1), LOCK_SEC);
+    fail_('WRONG', '관리 비밀번호가 맞지 않아요. 수업을 개설할 때 정한 비밀번호를 써 주세요.');
+  }
+  cache.remove(failKey);
+  found.sort((a, b) => a.created < b.created ? 1 : -1);
+  return { ok: true, classes: found };
 }
 
 /** 수업명 수정: 수업을 개설할 때 정한 관리 비밀번호가 맞아야 한다.
@@ -197,6 +229,15 @@ function showClasses() {
   const all = props_().getProperties();
   const keys = Object.keys(all).filter(k => k.indexOf('c:') === 0);
   Logger.log(keys.length + '개\n' + keys.map(k => k.slice(2) + '  ' + all[k]).join('\n'));
+}
+
+/** 운영자가 수업 하나를 지울 때: CODE에 수업 코드 6자리를 쓰고 실행합니다. (저장된 글 문서는 지우지 않아요) */
+function deleteClass() {
+  const CODE = 'ABC234';
+  const c = read_(CODE);
+  if (!c) { Logger.log('없는 수업 코드: ' + CODE); return; }
+  props_().deleteProperty(key_(CODE));
+  Logger.log('지운 수업: ' + CODE + ' ' + c.name);
 }
 
 /** 예전 방식(이 계정에 직접 저장)에서 남은 학생 비밀번호·저장 시각 기록을 지웁니다. 글 문서는 지우지 않아요. */
