@@ -421,6 +421,12 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
 .ck details { margin: 8px 0 0 30px; font-size: 14px; }
 .ck summary { cursor: pointer; color: var(--accent); font-weight: 700; }
 .ck details p { margin: 6px 0 0; }
+.para-shape > .ck-desc { margin: 0 0 8px; }
+.para-shape .ck-top span { font-weight: 700; }
+.para-shape .ck.ok { background: var(--ok-bg); border-color: var(--ok); }
+.para-shape .ck-note, .para-shape .ex { margin: 6px 0 0; }
+.para-shape .ck-note { font-weight: 400; }
+.para-shape .evidence { margin: 8px 0 0; flex-direction: row; flex-wrap: wrap; }
 .finish { margin-top: 16px; padding: 14px; border-radius: 12px; background: var(--ok-bg); color: var(--ok); font-weight: 700; text-align: center; }
 
 /* 알림 */
@@ -763,7 +769,7 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
         <textarea id="editor" spellcheck="false" aria-label="글 입력 편집창" placeholder="공책에 쓴 초고를 여기에 옮겨 적어 보세요.
 
 · 첫 줄에 제목을 쓰면, 제목은 빼고 점검해요.
-· 문단이 바뀌는 곳에서는 줄을 바꾸거나 한 줄을 띄어 주세요."></textarea>
+· 문단이 바뀌는 곳에서는 빈 줄 없이 줄을 바꾸고, 첫머리를 두 칸 들여 써 주세요."></textarea>
       </div>
       <div class="statbar">
         <div class="stats" id="stats"></div>
@@ -1391,7 +1397,7 @@ const CHECKLISTS = {
           ex: '오늘부터 휴대폰 사용 시간을 스스로 정해 지켜 보자.' },
       ] },
       { name: '전체', items: [
-        paraItem('서론–본론–결론으로 문단을 나누었나요?', '서론, 근거 하나하나, 결론이 바뀌는 곳에서 줄을 바꾸고 한 줄을 띄어 문단을 나눠 보세요.'),
+        paraItem('서론–본론–결론으로 문단을 나누었나요?', '서론, 근거 하나하나, 결론이 바뀌는 곳에서 줄을 바꾸고 두 칸 들여 써서 문단을 나눠 보세요.'),
       ] },
     ],
   },
@@ -1498,21 +1504,25 @@ const CHECKLISTS = {
   },
 };
 
-// 문단 나누기: 빈 줄이 있으면 빈 줄 기준, 없으면 줄 바꿈 기준
+// 문단 나누기: 줄 바꿈 기준 (빈 줄은 문단이 아님). 제목 줄은 뺀다.
+// gapBefore: 바로 앞 문단과의 사이에 빈 줄이 있음 · indent: 첫머리를 두 칸 이상 들여 씀
+const INDENT_RE = /^( {2,}|\t|　)/;
 function getParagraphs(text, sents) {
   const paras = [];
-  const blank = /\n[ \t]*\n/.test(text);
-  let pos = 0, cur = null;
+  let pos = 0, gap = false;
   for (const line of text.split('\n')) {
     const s = pos, e = pos + line.length;
     pos = e + 1;
-    if (!line.trim()) { cur = null; continue; }
-    if (blank && cur) cur.end = e;
-    else { cur = { start: s, end: e }; paras.push(cur); }
+    if (!line.trim()) { gap = true; continue; }
+    const lead = line.match(/^[ \t　]*/)[0].length;
+    paras.push({ start: s, end: e, textStart: s + lead, text: line.trim(), indent: INDENT_RE.test(line), gapBefore: gap && paras.length > 0 });
+    gap = false;
   }
   const t = sents.find(s => s.isTitle);
   if (!t) return paras;
-  return paras.filter(p => !(p.start <= t.start && t.end <= p.end && text.slice(p.start, p.end).trim() === t.text));
+  const out = paras.filter(p => !(p.start <= t.start && t.end <= p.end && p.text === t.text));
+  if (out.length && out.length < paras.length) out[0] = { ...out[0], gapBefore: false };   // 제목과 첫 문단 사이 빈 줄은 괜찮음
+  return out;
 }
 
 function buildContext(text) {
@@ -1534,7 +1544,7 @@ function buildContext(text) {
     concl = all.slice(all.length - k);
     body = all.slice(k, all.length - k);
   }
-  return { text, full: sents, all, intro, body, concl, paraCount: paras.length, byPara };
+  return { text, full: sents, all, intro, body, concl, paras, paraCount: paras.length, byPara };
 }
 
 function evalItem(it, ctx) {
@@ -2304,6 +2314,29 @@ function progressOf() {
   return { done: state.s2.checked.size, total };
 }
 
+/** 문단 모양 안내: 문단 사이 빈 줄 · 문단 첫머리 두 칸 들여쓰기 (state.ev에 찾아가기 버튼을 넣음) */
+function paraShapeHTML(paras, hasTitle) {
+  if (!paras.length) return '';
+  const quotes = list => list.slice(0, 6).map(p => {
+    const snip = p.text.length > 18 ? p.text.slice(0, 16) : p.text;
+    state.ev.push({ start: p.textStart, text: snip });
+    return `<button type="button" class="quote" data-ev="${state.ev.length - 1}" title="편집창에서 찾기">“${esc(snip)}${p.text.length > 18 ? '…' : ''}”</button>`;
+  }).join('') + (list.length > 6 ? `<span class="muted"> 외 ${list.length - 6}곳</span>` : '');
+  const gaps = paras.filter(p => p.gapBefore);
+  const flat = paras.filter(p => !p.indent);
+  let html = `<section class="s2-sec para-shape"><h4>문단 모양</h4>
+    <p class="ck-desc">문단은 <b>줄 바꿈</b>으로 나눠요. 지금 글의 문단은 <b>${paras.length}개</b>예요.${hasTitle ? ' (제목 줄은 빼고 셌어요)' : ''}</p><ul class="checks">`;
+  html += `<li class="ck ${gaps.length ? 'check' : 'ok'}"><div class="ck-top"><span>${gaps.length
+      ? `🔎 문단 사이에 빈 줄이 ${gaps.length}군데 있어요`
+      : '✅ 문단 사이에 빈 줄 없이 이어 썼어요'}</span></div>
+    ${gaps.length ? `<p class="ck-note">빈 줄을 지우고 문단을 <b>이어 붙여</b> 주세요. 새 문단은 빈 줄 없이 <b>줄만 바꿔서</b> 시작해요. 아래는 앞에 빈 줄이 있는 문단이에요.</p><div class="evidence">${quotes(gaps)}</div>` : ''}</li>`;
+  html += `<li class="ck ${flat.length ? 'check' : 'ok'}"><div class="ck-top"><span>${flat.length
+      ? `🔎 첫머리를 들여 쓰지 않은 문단이 ${flat.length}개 있어요`
+      : '✅ 모든 문단의 첫머리를 들여 썼어요'}</span></div>
+    ${flat.length ? `<p class="ck-note">문단이 시작되는 곳에서 <b>스페이스바를 두 번</b> 눌러 <b>두 칸 들여 써</b> 주세요. 들여쓰기를 하면 새 문단이 시작되는 곳이 한눈에 보여요.</p><p class="ex"><span>예</span>␣␣첫째, 휴대폰을 오래 사용하면 공부에 집중할 수 없다.</p><div class="evidence">${quotes(flat)}</div>` : ''}</li>`;
+  return html + '</ul></section>';
+}
+
 function renderStage2() {
   const r = state.s2;
   const cl = CHECKLISTS[r.genre];
@@ -2313,8 +2346,9 @@ function renderStage2() {
   let html = `<div class="s2-head"><h3>${cl.label} 점검표</h3>
     <div class="progress"><span id="prog"><b>${p.done}</b> / ${p.total} 확인</span><div class="bar"><i id="progbar" style="width:${p.done / p.total * 100}%"></i></div></div></div>
     <p class="note">✅/🔎 표시는 글 속 낱말을 보고 짐작한 결과예요. 내 글을 다시 읽고, 그 내용이 들어 있으면 직접 체크하세요.</p>`;
+  html += paraShapeHTML(r.ctx.paras, r.ctx.full.some(s => s.isTitle));
   if (!r.ctx.byPara) {
-    html += `<p class="para-note">📌 문단이 ${r.ctx.paraCount}개라서 문장 순서로 ${cl.parts}을 짐작했어요. 문단을 나누면 더 정확하게 점검할 수 있어요.</p>`;
+    html += `<p class="para-note">📌 문단이 ${r.ctx.paraCount}개라서 문장 순서로 ${cl.parts}을 짐작했어요. 문단이 바뀌는 곳에서 줄을 바꾸면 더 정확하게 점검할 수 있어요.</p>`;
   }
   r.results.forEach(sec => {
     html += `<section class="s2-sec"><h4>${sec.name}</h4><ul class="checks">`;
