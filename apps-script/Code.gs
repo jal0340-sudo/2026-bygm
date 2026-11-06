@@ -1,30 +1,31 @@
 /**
- * 글틔움 저장 서버 (Google Apps Script 웹 앱)
+ * 글틔움 수업 목록 서버 (Google Apps Script 웹 앱)
  *
- * 선생님 계정(jal0340@gmail.com)으로 배포하면, 학생이 글틔움에서 [저장]을 누를 때
- * 선생님 구글 드라이브의 '글틔움' 폴더에 '학번 이름' 제목의 구글 문서로 저장됩니다.
- * 같은 학번·이름으로 다시 저장하면 같은 문서에 덮어씁니다.
+ * 선생님들이 개설한 수업(수업명 · 수업 코드 · 저장 서버 주소)만 보관합니다.
+ * 학생 글과 비밀번호는 여기에 저장되지 않고, 수업을 개설한 선생님의 저장 서버
+ * (save-server/Code.gs, 선생님 본인 계정에 배포)로 바로 갑니다.
  *
- * 학생은 처음 로그인할 때 비밀번호를 정하고, 다음부터는 그 비밀번호로 로그인합니다.
- * 비밀번호는 원문이 아니라 해시(SHA-256 + 솔트)로 '스크립트 속성'에 보관합니다.
+ * - 수업 코드는 다른 수업과 겹치지 않게 자동으로 만듭니다.
+ * - 개설된 수업은 누구도 지울 수 없고, 목록으로 확인만 할 수 있습니다.
+ * - 1년 동안 새로 저장된 글이 없으면 수업과 수업 코드를 자동으로 지우고 저장 서버 연결을 끊습니다.
  *
- * 설치 방법은 apps-script/설치안내.md 를 보세요.
+ * 다시 배포하는 방법은 apps-script/설치안내.md 를 보세요.
  */
 
-const FOLDER_NAME = '글틔움';
-const MAX_LEN = 50000;   // 글 한 편의 최대 글자 수
-const MAX_FAIL = 5;      // 비밀번호를 이만큼 틀리면
-const LOCK_SEC = 300;    // 이 시간(초) 동안 로그인을 막음
+const EXPIRE_DAYS = 365;
+const CODE_CHARS = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';   // 헷갈리는 0·O·1·I·L은 뺌
+const CODE_LEN = 6;
+const MAX_CREATE_PER_HOUR = 30;                          // 장난 개설 막기
+const URL_RE = /^https:\/\/script\.google\.com\/(a\/[^\/]+\/)?macros\/s\/[\w-]{20,}\/exec$/;
 
-/** 요청은 모두 POST: {"action":"login"|"register"|"save","id","name","pw","text"} */
+/** 요청은 모두 POST: {"action":"lookup"|"create"|"touch"|"list", ...} */
 function doPost(e) {
   try {
     const b = JSON.parse((e && e.postData && e.postData.contents) || '{}');
-    const title = title_(b.id, b.name);
-    const pw = String(b.pw || '');
-    if (b.action === 'login') return json_(login_(title, pw));
-    if (b.action === 'register') return json_(register_(title, pw));
-    if (b.action === 'save') return json_(save_(title, pw, b.text));
+    if (b.action === 'lookup') return json_(lookup_(b.code));
+    if (b.action === 'create') return json_(create_(b.name, b.url));
+    if (b.action === 'touch') return json_(touch_(b.code));
+    if (b.action === 'list') return json_(list_());
     throw new Error('알 수 없는 요청이에요.');
   } catch (err) {
     return json_({ ok: false, code: err.code || 'ERROR', error: String(err.message || err) });
@@ -32,129 +33,97 @@ function doPost(e) {
 }
 
 function doGet() {
-  return json_({ ok: true, service: '글틔움' });
+  return json_({ ok: true, service: '글틔움 수업 목록' });
 }
 
 /* ---------- 동작 ---------- */
 
-function login_(title, pw) {
-  if (!getPw_(title)) return { ok: false, code: 'NEW', error: '처음 로그인하는 학번·이름이에요.' };
-  checkPw_(title, pw);
-  return loaded_(title);
+/** 학생이 수업 코드를 쓰면 수업명과 저장 서버 주소를 알려 준다 */
+function lookup_(code) {
+  code = cleanCode_(code);
+  const c = read_(code);
+  if (!c) fail_('NOCLASS', '없는 수업 코드예요.');
+  if (expired_(c)) {
+    withLock_(() => props_().deleteProperty(key_(code)));
+    fail_('NOCLASS', '1년 동안 저장된 글이 없어 삭제된 수업 코드예요.');
+  }
+  return { ok: true, code: code, name: c.name, url: c.url };
 }
 
-function register_(title, pw) {
-  if (!/^.{4,20}$/.test(pw)) fail_('BADPW', '비밀번호는 4~20자로 정해 주세요.');
+/** 수업 개설: 겹치지 않는 수업 코드를 만들어 수업명·저장 서버 주소와 함께 보관 */
+function create_(name, url) {
+  name = String(name || '').trim().replace(/\s+/g, ' ');
+  url = String(url || '').trim();
+  if (name.length < 1 || name.length > 30 || /[\\\/:*?"<>|()]/.test(name)) fail_('BADNAME', '수업명은 30자 이하로, 괄호·특수 기호 없이 써 주세요.');
+  if (!URL_RE.test(url)) fail_('BADURL', '저장 서버 주소가 올바르지 않아요. https://script.google.com/macros/s/…/exec 모양이어야 해요.');
+  const cache = CacheService.getScriptCache();
+  const made = Number(cache.get('made') || 0);
+  if (made >= MAX_CREATE_PER_HOUR) fail_('BUSY', '지금은 수업 개설 요청이 많아요. 잠시 뒤에 다시 해 주세요.');
   return withLock_(() => {
-    if (getPw_(title)) {        // 그 사이 이미 정해졌다면 일반 로그인처럼 확인
-      checkPw_(title, pw);
-      return loaded_(title);
-    }
-    const salt = Utilities.getUuid();
-    props_().setProperty(key_(title), salt + ':' + hash_(salt, pw));
-    return loaded_(title);
-  });
-}
-
-function save_(title, pw, text) {
-  checkPw_(title, pw);
-  text = String(text == null ? '' : text).replace(/\r\n?/g, '\n');
-  if (text.length > MAX_LEN) fail_('TOOLONG', '글이 너무 길어요. (' + MAX_LEN + '자 이하)');
-  return withLock_(() => {
-    const folder = getFolder_();
-    let file = findDoc_(folder, title);
-    let created = false;
-    if (!file) {
-      const doc = DocumentApp.create(title);
-      doc.saveAndClose();
-      file = DriveApp.getFileById(doc.getId());
-      file.moveTo(folder);
-      created = true;
-    }
-    writeDoc_(file.getId(), text);
+    purge_();
+    let code;
+    do {
+      code = '';
+      for (let i = 0; i < CODE_LEN; i++) code += CODE_CHARS.charAt(Math.floor(Math.random() * CODE_CHARS.length));
+    } while (props_().getProperty(key_(code)));
     const now = new Date().toISOString();
-    props_().setProperty('at:' + title, now);   // 드라이브의 '수정한 날짜'는 늦게 바뀌어서 따로 기록
-    return { ok: true, title: title, created: created, updated: now };
+    props_().setProperty(key_(code), JSON.stringify({ name: name, url: url, created: now, last: now }));
+    cache.put('made', String(made + 1), 3600);
+    return { ok: true, code: code, name: name, created: now, expires: addDays_(now) };
   });
 }
 
-function loaded_(title) {
-  const file = findDoc_(getFolder_(), title);
-  if (!file) return { ok: true, title: title, exists: false };
-  const updated = props_().getProperty('at:' + title) || file.getLastUpdated().toISOString();
-  return { ok: true, title: title, exists: true, text: readDoc_(file.getId()), updated: updated };
+/** 학생 글이 저장될 때마다 마지막 저장 시각을 새로 고친다 (1년 기한이 다시 시작) */
+function touch_(code) {
+  code = cleanCode_(code);
+  const c = read_(code);
+  if (!c || expired_(c)) return { ok: true };
+  if (c.last === c.created || Date.now() - Date.parse(c.last) > 3600 * 1000) {   // 첫 저장 뒤에는 한 시간에 한 번만 기록
+    c.last = new Date().toISOString();
+    props_().setProperty(key_(code), JSON.stringify(c));
+  }
+  return { ok: true };
 }
 
-/* ---------- 비밀번호 ---------- */
+/** 개설된 수업 목록 (확인용). 학생 보호를 위해 수업 코드는 일부만, 저장 서버 주소는 보여 주지 않는다 */
+function list_() {
+  withLock_(purge_);
+  const all = props_().getProperties();
+  const list = Object.keys(all).filter(k => k.indexOf('c:') === 0).map(k => {
+    const c = JSON.parse(all[k]);
+    const code = k.slice(2);
+    return { name: c.name, code: code.slice(0, 2) + '••••', created: c.created, last: c.last, expires: addDays_(c.last) };
+  }).sort((a, b) => a.created < b.created ? 1 : -1);
+  return { ok: true, classes: list };
+}
+
+/* ---------- 도우미 ---------- */
 
 function props_() { return PropertiesService.getScriptProperties(); }
-function key_(title) { return 'pw:' + title; }
-function getPw_(title) { return props_().getProperty(key_(title)); }
+function key_(code) { return 'c:' + code; }
+function read_(code) { const v = props_().getProperty(key_(code)); return v ? JSON.parse(v) : null; }
+function expired_(c) { return Date.now() - Date.parse(c.last) > EXPIRE_DAYS * 864e5; }
+function addDays_(iso) { return new Date(Date.parse(iso) + EXPIRE_DAYS * 864e5).toISOString(); }
 
-function hash_(salt, pw) {
-  const bytes = Utilities.computeDigest(Utilities.DigestAlgorithm.SHA_256, salt + '|' + pw, Utilities.Charset.UTF_8);
-  return Utilities.base64Encode(bytes);
+/** 기한이 지난 수업을 지운다 (수업 코드와 저장 서버 연결이 함께 사라짐) */
+function purge_() {
+  const all = props_().getProperties();
+  Object.keys(all).forEach(k => {
+    if (k.indexOf('c:') !== 0) return;
+    try { if (expired_(JSON.parse(all[k]))) props_().deleteProperty(k); } catch (e) { props_().deleteProperty(k); }
+  });
 }
 
-function checkPw_(title, pw) {
-  const stored = getPw_(title);
-  if (!stored) fail_('NEW', '처음 로그인하는 학번·이름이에요.');
-  const cache = CacheService.getScriptCache();
-  const failKey = 'fail:' + title;
-  const fails = Number(cache.get(failKey) || 0);
-  if (fails >= MAX_FAIL) fail_('LOCKED', '비밀번호를 여러 번 틀렸어요. ' + Math.round(LOCK_SEC / 60) + '분 뒤에 다시 해 보세요.');
-  const i = stored.indexOf(':');
-  if (hash_(stored.slice(0, i), pw) !== stored.slice(i + 1)) {
-    cache.put(failKey, String(fails + 1), LOCK_SEC);
-    const left = MAX_FAIL - fails - 1;
-    fail_('WRONG', left > 0 ? '비밀번호가 맞지 않아요. (' + left + '번 더 틀리면 잠시 막혀요)' : '비밀번호를 여러 번 틀렸어요. ' + Math.round(LOCK_SEC / 60) + '분 뒤에 다시 해 보세요.');
-  }
-  cache.remove(failKey);
+function cleanCode_(code) {
+  code = String(code || '').trim().toUpperCase();
+  if (!/^[A-Z0-9]{6}$/.test(code)) fail_('BADCODE', '수업 코드는 6자리로 써 주세요.');
+  return code;
 }
 
 function fail_(code, msg) {
   const err = new Error(msg);
   err.code = code;
   throw err;
-}
-
-/* ---------- 드라이브 ---------- */
-
-function title_(id, name) {
-  id = String(id || '').trim();
-  name = String(name || '').trim().replace(/\s+/g, ' ');
-  if (!/^\d{4,6}$/.test(id)) fail_('BADID', '학번은 숫자 4~6자리로 써 주세요.');
-  if (!/^[가-힣A-Za-z ]{2,20}$/.test(name)) fail_('BADNAME', '이름을 바르게 써 주세요.');
-  return id + ' ' + name;
-}
-
-function getFolder_() {
-  const root = DriveApp.getRootFolder();
-  const it = root.getFoldersByName(FOLDER_NAME);
-  return it.hasNext() ? it.next() : root.createFolder(FOLDER_NAME);
-}
-
-function findDoc_(folder, title) {
-  const it = folder.getFilesByName(title);
-  while (it.hasNext()) {
-    const f = it.next();
-    if (!f.isTrashed() && f.getMimeType() === MimeType.GOOGLE_DOCS) return f;
-  }
-  return null;
-}
-
-function readDoc_(docId) {
-  return DocumentApp.openById(docId).getBody().getParagraphs().map(p => p.getText()).join('\n');
-}
-
-function writeDoc_(docId, text) {
-  const doc = DocumentApp.openById(docId);
-  const body = doc.getBody();
-  const lines = text.split('\n');
-  body.clear();
-  body.getParagraphs()[0].setText(lines[0]);
-  for (let i = 1; i < lines.length; i++) body.appendParagraph(lines[i]);
-  doc.saveAndClose();
 }
 
 function withLock_(fn) {
@@ -167,25 +136,19 @@ function json_(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);
 }
 
-/* ---------- 선생님용 (편집기에서 직접 실행) ---------- */
+/* ---------- 관리용 (편집기에서 직접 실행) ---------- */
 
-/** 처음 한 번 실행해 권한을 승인하고 '글틔움' 폴더를 만듭니다. */
-function setup() {
-  Logger.log('폴더 준비 완료: ' + getFolder_().getUrl());
+/** 개설된 수업 전체(코드·저장 서버 주소 포함)를 실행 로그에 보여 줍니다. */
+function showClasses() {
+  const all = props_().getProperties();
+  const keys = Object.keys(all).filter(k => k.indexOf('c:') === 0);
+  Logger.log(keys.length + '개\n' + keys.map(k => k.slice(2) + '  ' + all[k]).join('\n'));
 }
 
-/** 학생이 비밀번호를 잊었을 때: 아래 따옴표 안에 '학번 이름'을 쓰고 실행하세요.
- *  비밀번호만 지워지고 글은 그대로 남습니다. 학생은 다음 로그인 때 새 비밀번호를 정합니다. */
-function resetPassword() {
-  const TITLE = '10101 홍길동';
-  if (!getPw_(TITLE)) { Logger.log('등록된 비밀번호가 없어요: ' + TITLE); return; }
-  props_().deleteProperty(key_(TITLE));
-  CacheService.getScriptCache().remove('fail:' + TITLE);
-  Logger.log('비밀번호를 초기화했어요: ' + TITLE);
-}
-
-/** 비밀번호를 등록한 학생 목록을 로그에 보여 줍니다. */
-function listStudents() {
-  const names = Object.keys(props_().getProperties()).filter(k => k.indexOf('pw:') === 0).map(k => k.slice(3)).sort();
-  Logger.log(names.length + '명\n' + names.join('\n'));
+/** 예전 방식(이 계정에 직접 저장)에서 남은 학생 비밀번호·저장 시각 기록을 지웁니다. 글 문서는 지우지 않아요. */
+function cleanupOldStudentData() {
+  const all = props_().getProperties();
+  const old = Object.keys(all).filter(k => k.indexOf('pw:') === 0 || k.indexOf('at:') === 0);
+  old.forEach(k => props_().deleteProperty(k));
+  Logger.log('지운 예전 기록: ' + old.length + '개');
 }

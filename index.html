@@ -94,6 +94,11 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
 .topnav .navbtn { border: 0; background: none; font: inherit; color: var(--muted); padding: 4px 2px; border-bottom: 2px solid transparent; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
 .topnav .navbtn:hover { color: var(--navy); }
 .topnav .navbtn svg { width: 17px; height: 17px; }
+.topnav a, .topnav .navbtn { white-space: nowrap; }
+@media (max-width: 520px) {
+  .topbar .topnav { gap: 11px; font-size: 14px; }
+  .topnav .navbtn svg { display: none; }
+}
 
 /* QR코드 팝업 */
 .qr-dialog { border: 0; padding: 0; border-radius: 28px; background: var(--panel); color: var(--text); box-shadow: 0 24px 60px rgba(31, 53, 87, .28); max-width: calc(100vw - 32px); }
@@ -169,6 +174,14 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
 .login .cta { width: 100%; justify-content: center; margin-top: 12px; }
 .login-msg { min-height: 1.4em; margin: 8px 2px 0; font-size: 13.5px; color: var(--warn); }
 .login-msg.ok { color: var(--muted); }
+.code-row { margin-bottom: 8px; align-items: center; }
+.code-row input { text-transform: uppercase; letter-spacing: 2px; font-weight: 700; }
+.code-row input::placeholder { letter-spacing: 0; font-weight: 400; text-transform: none; }
+.code-class { font-size: 14px; color: var(--muted); line-height: 1.35; min-width: 0; }
+.code-class.ok { color: var(--leaf-dark); font-weight: 800; font-size: 15.5px; }
+.code-class.ok::before { content: "✓ "; }
+.code-class.bad { color: var(--warn); font-weight: 700; }
+.welcome-class { display: block; font-size: 14.5px; font-weight: 700; color: var(--leaf-dark); margin-bottom: 2px; }
 .welcome { display: none; }
 .logged .login { display: none; }
 .logged .welcome { display: block; }
@@ -178,6 +191,54 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
 .userchip { display: inline-flex; align-items: center; gap: 8px; font-size: 14.5px; color: var(--navy); font-weight: 700; }
 .userchip svg { width: 22px; height: 22px; padding: 3px; border-radius: 50%; background: var(--accent-weak); color: var(--navy); }
 .userchip[hidden] { display: none; }
+
+/* 선생님 설정 */
+.tpage { max-width: 880px; display: flex; flex-direction: column; gap: 16px; }
+.t-card { background: var(--panel); border: 1.5px solid var(--frame); border-radius: 24px; padding: 24px 28px; box-shadow: var(--shadow); }
+.t-intro { display: flex; align-items: flex-start; gap: 18px; background: linear-gradient(110deg, #fff9ef 0%, #fdf0dc 60%, #f7e2c2 100%); }
+@media (prefers-color-scheme: dark) { .t-intro { background: linear-gradient(110deg, #2a241d 0%, #33291c 100%); } }
+.t-intro > div { flex: 1; }
+.t-intro .btn { flex: none; }
+.t-title { margin: 0 0 8px; font-size: 26px; color: var(--navy); }
+.t-title small { font-size: 16px; color: var(--muted); font-weight: 700; margin-left: 6px; }
+.t-lead { margin: 0; font-size: 15.5px; }
+.t-lead b { color: var(--navy); }
+.t-card h2 { margin: 0 0 14px; font-size: 19px; color: var(--navy); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.t-card h2 small { font-size: 13.5px; color: var(--muted); font-weight: 600; }
+.t-num { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; background: var(--accent); color: var(--accent-text); font-size: 15px; font-weight: 800; flex: none; }
+.t-steps { margin: 0; padding-left: 22px; display: flex; flex-direction: column; gap: 9px; font-size: 15px; }
+.t-steps li::marker { color: var(--accent); font-weight: 800; }
+.t-steps a { color: var(--navy); font-weight: 700; }
+.t-tip { margin: 14px 0 0; padding: 10px 14px; border-radius: 12px; background: var(--teal-bg); font-size: 14px; color: var(--text); }
+.t-form { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 10px 14px; align-items: center; }
+.t-form label { font-weight: 700; color: var(--navy); }
+.t-form input { width: 100%; padding: 11px 14px; border: 1.5px solid var(--line); border-radius: 12px; background: var(--panel); font-size: 16px; color: var(--text); outline: none; }
+.t-form input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-weak); }
+.t-form .t-help, .t-form .btn, .t-form .t-msg { grid-column: 2; }
+.t-form .btn { justify-self: start; }
+.t-help { margin: 0; font-size: 13.5px; color: var(--muted); }
+.t-msg { min-height: 1.4em; margin: 0; font-size: 14px; color: var(--warn); }
+.t-msg.ok { color: var(--muted); }
+.t-result { margin-top: 4px; padding: 18px 20px; border-radius: 16px; background: var(--ok-bg); border: 1.5px solid var(--ok); }
+.t-result p { margin: 0 0 8px; font-size: 14.5px; }
+.t-done { font-size: 17px !important; }
+.t-code { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 6px 0 12px; }
+.t-code-label { font-size: 14px; font-weight: 700; color: var(--muted); }
+.t-code b { font-size: 38px; letter-spacing: 6px; color: var(--navy); font-family: ui-monospace, Consolas, monospace; background: var(--panel); padding: 2px 16px; border-radius: 12px; border: 1.5px dashed var(--frame); }
+.t-warn { color: var(--warn); font-weight: 700; }
+.t-notice { margin-top: 18px; padding: 14px 18px; border-radius: 14px; background: var(--warn-bg); font-size: 14.5px; }
+.t-notice > b { color: var(--warn); }
+.t-notice ul { margin: 8px 0 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.list-box { text-align: left; width: min(760px, calc(100vw - 32px)); max-height: 82vh; display: flex; flex-direction: column; }
+.list-box > p { margin: 0 0 14px; }
+.class-list { overflow: auto; min-height: 80px; border: 1px solid var(--line); border-radius: 14px; }
+.class-list table { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+.class-list th, .class-list td { padding: 9px 12px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+.class-list th { position: sticky; top: 0; background: var(--soft); color: var(--navy); font-size: 13.5px; }
+.class-list td:first-child { white-space: normal; font-weight: 700; min-width: 140px; }
+.class-list tr:last-child td { border-bottom: 0; }
+.class-list .empty { margin: 0; border-radius: 0; }
+.class-list .mono { font-family: ui-monospace, Consolas, monospace; letter-spacing: 1px; }
 
 /* 저장 */
 .btn.save { background: var(--leaf-dark); border-color: var(--leaf-dark); color: #fff; }
@@ -368,6 +429,14 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
   .userchip span { display: none; }
   .login { max-width: none; }
   .login-row { grid-template-columns: 96px minmax(0, 1fr); }
+  .code-row { grid-template-columns: 124px minmax(0, 1fr); }
+  .topnav { gap: 14px; font-size: 14.5px; }
+  .t-card { padding: 20px 18px; border-radius: 20px; }
+  .t-intro { flex-direction: column; }
+  .t-form { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .t-form .t-help, .t-form .btn, .t-form .t-msg { grid-column: 1; }
+  .t-form input { margin-bottom: 6px; }
+  .t-code b { font-size: 30px; letter-spacing: 4px; }
   .home { padding: 12px 12px 32px; }
   .sheet { border-radius: 22px; }
   .hero { grid-template-columns: minmax(0, 1fr); padding: 30px 22px 0; text-align: left; }
@@ -422,12 +491,13 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
     <nav class="topnav" aria-label="메뉴">
       <button type="button" class="navbtn" id="btnQr" aria-haspopup="dialog"><svg class="i" aria-hidden="true"><use href="#i-qr"/></svg>QR코드</button>
       <a href="#home" class="on" data-nav="home">홈</a>
+      <a href="#teacher" data-nav="teacher">선생님 설정</a>
       <a href="#guide" data-nav="guide">이용 안내</a>
       <span class="userchip" data-user hidden><svg class="i" aria-hidden="true"><use href="#i-user"/></svg><span data-user-name></span></span>
     </nav>
   </header>
 
-  <main class="home">
+  <main class="home" id="homeMain">
     <div class="sheet">
       <section class="hero">
         <div class="hero-text">
@@ -435,7 +505,11 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
           <p class="hero-sub">문장은 매끄럽게, 글은 탄탄하게</p>
           <p class="hero-desc">내 글을 스스로 점검하고,<br>더 좋은 글로 다듬어 가는 글쓰기 성장 도우미,<br>지금 바로 시작해 보세요!</p>
           <form class="login" id="loginForm" autocomplete="off" novalidate>
-            <p class="login-title">학번·이름·비밀번호를 쓰고 시작해요</p>
+            <p class="login-title">수업 코드·학번·이름·비밀번호를 쓰고 시작해요</p>
+            <div class="login-row code-row">
+              <input id="loginCode" maxlength="6" placeholder="수업 코드" aria-label="수업 코드 (선생님께 받은 6자리)" aria-describedby="codeClass" autocapitalize="characters" spellcheck="false">
+              <span class="code-class" id="codeClass" aria-live="polite">선생님께 받은 6자리 코드</span>
+            </div>
             <div class="login-row">
               <input id="loginId" inputmode="numeric" maxlength="6" placeholder="학번" aria-label="학번 (예: 10101)">
               <input id="loginName" maxlength="20" placeholder="이름" aria-label="이름">
@@ -449,7 +523,7 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
             <p class="login-msg" id="loginMsg" role="status"></p>
           </form>
           <div class="welcome">
-            <p class="welcome-hi"><b data-user-name></b> 학생, 반가워요!</p>
+            <p class="welcome-hi"><span class="welcome-class" data-class-name></span><b data-user-name></b> 학생, 반가워요!</p>
             <button type="button" class="cta" id="btnStart">글다듬기 시작하기 <svg class="i" aria-hidden="true"><use href="#i-arrow"/></svg></button><br>
             <button type="button" class="linkbtn" data-logout>내가 아니에요 · 로그아웃</button>
           </div>
@@ -535,7 +609,63 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
       <p class="hand">글틔움과 함께<br>더 좋은 글을 써 보세요!</p>
       <svg class="hand-line" viewBox="0 0 200 10" aria-hidden="true"><path d="M4 7q96-8 192-2" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
     </section>
-    <p class="home-note">🔒 맞춤법·구조 점검은 이 기기 브라우저 안에서만 이루어져요. 글은 [저장]을 누를 때만 선생님 구글 드라이브에 ‘학번 이름’ 문서로 저장되고, 다른 학생에게는 공개되지 않아요.</p>
+    <p class="home-note">🔒 맞춤법·구조 점검은 이 기기 브라우저 안에서만 이루어져요. 글은 [저장]을 누를 때만 수업을 개설한 선생님의 구글 드라이브에 ‘수업명(학번 이름)’ 문서로 저장되고, 다른 학생에게는 공개되지 않아요.</p>
+  </main>
+
+  <!-- ================= 선생님 설정: 수업 개설 ================= -->
+  <main class="home tpage" id="teacherMain" hidden>
+    <section class="t-card t-intro">
+      <div>
+        <h1 class="t-title">선생님 설정 <small>수업 개설</small></h1>
+        <p class="t-lead">수업을 개설하면 학생들이 쓴 글이 <b>개설한 선생님 본인의 구글 드라이브</b> › ‘글틔움’ 폴더에 <b>‘수업명(학번 이름)’</b> 문서로 저장돼요. 학생은 첫 화면에서 수업 코드를 쓰고 로그인해요.</p>
+      </div>
+      <button type="button" class="btn" id="btnClassList"><svg class="i" aria-hidden="true"><use href="#i-text"/></svg>개설된 수업 보기</button>
+    </section>
+
+    <section class="t-card">
+      <h2><span class="t-num">1</span>학생 글을 저장할 구글 계정 연결하기 <small>처음 한 번만</small></h2>
+      <ol class="t-steps">
+        <li><button type="button" class="btn small" id="btnCopyServer"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg>저장 서버 코드 복사</button> 를 누르세요.</li>
+        <li>학생 글을 저장할 <b>구글 계정으로 로그인한 상태</b>에서 <a href="https://script.new" target="_blank" rel="noopener">Apps Script 새 프로젝트 열기 ↗</a>를 누르세요.</li>
+        <li>편집기에 있는 내용을 모두 지우고, 복사한 코드를 붙여 넣은 뒤 <b>저장(Ctrl+S)</b>하세요. 프로젝트 이름은 ‘글틔움 저장 서버’처럼 바꿔 두면 좋아요.</li>
+        <li>오른쪽 위 <b>[배포] → [새 배포]</b>를 누르고, 톱니바퀴(유형 선택)에서 <b>웹 앱</b>을 고르세요.<br>
+          <b>다음 사용자 인증 정보로 실행: 나</b> · <b>액세스 권한이 있는 사용자: 모든 사용자</b>로 정하고 <b>[배포]</b>를 누르세요.</li>
+        <li><b>[액세스 승인]</b> → 계정 선택 → <b>고급 → ‘(프로젝트 이름)(으)로 이동’ → 허용</b>을 누르세요. 선생님이 직접 만든 스크립트라서 나오는 안내예요.</li>
+        <li>나온 <b>웹 앱 URL</b>(https://script.google.com/macros/s/…/exec)을 복사해 아래 ‘저장 서버 주소’ 칸에 붙여 넣으세요.</li>
+      </ol>
+      <p class="t-tip">이미 만든 저장 서버가 있다면 같은 주소로 수업을 여러 개 개설할 수 있어요. 학생 비밀번호는 원문이 아니라 암호화된 값으로만 선생님 저장 서버에 보관돼요.</p>
+    </section>
+
+    <section class="t-card">
+      <h2><span class="t-num">2</span>수업 개설하기</h2>
+      <form class="t-form" id="classForm" autocomplete="off" novalidate>
+        <label for="newClassName">수업명</label>
+        <input id="newClassName" maxlength="30" placeholder="예: 2학년 3반 국어">
+        <label for="serverUrl">저장 서버 주소 <span class="muted">(웹 앱 URL)</span></label>
+        <input id="serverUrl" inputmode="url" spellcheck="false" placeholder="https://script.google.com/macros/s/…/exec">
+        <p class="t-help">수업 코드는 다른 수업과 겹치지 않게 <b>자동으로 만들어져요.</b></p>
+        <button type="submit" class="btn primary" id="btnCreate">수업 개설하고 코드 받기</button>
+        <p class="t-msg" id="classMsg" role="status"></p>
+      </form>
+
+      <div class="t-result" id="classResult" hidden>
+        <p class="t-done">🎉 <b id="resName"></b> 수업이 개설되었어요!</p>
+        <div class="t-code"><span class="t-code-label">수업 코드</span><b id="resCode"></b><button type="button" class="btn small" id="btnCopyCode"><svg class="i" aria-hidden="true"><use href="#i-copy"/></svg>코드 복사</button></div>
+        <p class="t-warn" id="resBindFail" hidden>저장 서버에 수업을 연결하지 못했어요. <button type="button" class="linkbtn" id="btnRebind">다시 연결하기</button></p>
+        <p>학생들에게 이 <b>수업 코드</b>를 알려 주세요. 자동 삭제 예정일: <b id="resExpire"></b> (그 전에 학생 글이 저장되면 다시 1년 뒤로 늘어나요)</p>
+        <p class="muted">코드는 선생님 드라이브 ‘글틔움’ 폴더의 ‘글틔움 수업 코드 목록’ 문서에도 적혀 있어요. [개설된 수업 보기]에서는 학생 보호를 위해 코드 앞 두 자리만 보여요.</p>
+        <button type="button" class="linkbtn" id="btnAnother">다른 수업 더 개설하기</button>
+      </div>
+
+      <div class="t-notice">
+        <b>⚠ 꼭 알아 두세요</b>
+        <ul>
+          <li><b>1년 동안 이 수업 코드로 새로 저장되는 글(파일)이 없으면, 수업과 수업 코드가 자동으로 삭제되고 연결된 선생님 계정도 연결이 해제돼요.</b> 학생이 글을 저장할 때마다 1년이 새로 시작돼요.</li>
+          <li>자동 삭제되어도 이미 저장된 학생 글 문서는 선생님 드라이브에 그대로 남아요. 같은 수업을 다시 쓰려면 새로 개설해 새 코드를 받으면 돼요.</li>
+          <li>한 번 개설된 수업은 다른 선생님이 지울 수 없어요. 대신 [개설된 수업 보기]에서 어떤 수업이 개설되어 있는지 확인할 수 있어요.</li>
+        </ul>
+      </div>
+    </section>
   </main>
 </div>
 
@@ -579,7 +709,7 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
       </div>
       <div class="privacy">
         <svg class="i" aria-hidden="true"><use href="#i-lock"/></svg>
-        <div><b>글틔움은 여러분의 글을 안전하게 보호합니다.</b><b style="display:inline">저장</b>을 누르면 선생님 구글 드라이브에 ‘<span data-user-name></span>’ 문서로 저장돼요. 다시 저장하면 새 글로 덮어써요. 다른 학생에게는 공개되지 않아요.</div>
+        <div><b>글틔움은 여러분의 글을 안전하게 보호합니다.</b><b style="display:inline">저장</b>을 누르면 수업을 개설한 선생님의 구글 드라이브에 ‘<span data-doc-title></span>’ 문서로 저장돼요. 다시 저장하면 새 글로 덮어써요. 다른 학생에게는 공개되지 않아요.</div>
       </div>
     </section>
 
@@ -628,6 +758,16 @@ svg.i { width: 18px; height: 18px; flex: none; fill: none; stroke: currentColor;
     <p>휴대폰 카메라로 QR코드를 비춰 보세요.</p>
     <svg class="qr-img" viewBox="-2 -2 33 33" shape-rendering="crispEdges" role="img" aria-label="글틔움 주소 QR코드"><path stroke="#1f3557" d="M0 0.5h7m2 0h1m1 0h2m3 0h5m1 0h7M0 1.5h1m5 0h1m3 0h4m1 0h2m1 0h1m1 0h1m1 0h1m5 0h1M0 2.5h1m1 0h3m1 0h1m1 0h4m3 0h2m2 0h2m1 0h1m1 0h3m1 0h1M0 3.5h1m1 0h3m1 0h1m1 0h1m3 0h3m2 0h1m4 0h1m1 0h3m1 0h1M0 4.5h1m1 0h3m1 0h1m1 0h1m2 0h4m4 0h2m1 0h1m1 0h3m1 0h1M0 5.5h1m5 0h1m1 0h2m1 0h2m2 0h1m6 0h1m5 0h1M0 6.5h7m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h1m1 0h7M8 7.5h2m2 0h1m1 0h1m1 0h1m1 0h3M0 8.5h1m1 0h5m2 0h2m1 0h6m1 0h1m2 0h5M1 9.5h4m3 0h2m2 0h1m4 0h3m2 0h1m1 0h1m3 0h1M0 10.5h1m4 0h5m3 0h3m2 0h1m1 0h2m2 0h1M0 11.5h1m1 0h4m1 0h1m1 0h3m2 0h1m3 0h3m1 0h1m1 0h2m1 0h1M1 12.5h1m3 0h3m2 0h1m1 0h6m1 0h1m1 0h1m1 0h1m1 0h2M2 13.5h1m1 0h1m2 0h2m2 0h3m5 0h2m1 0h1m1 0h1m3 0h1M0 14.5h1m5 0h1m2 0h1m4 0h2m8 0h3M1 15.5h2m5 0h1m2 0h2m1 0h2m4 0h2m1 0h1m3 0h1M0 16.5h3m1 0h1m1 0h4m1 0h3m1 0h3m3 0h1m3 0h2M0 17.5h6m7 0h1m4 0h3m1 0h3m1 0h1m1 0h1M0 18.5h1m1 0h1m1 0h5m1 0h2m1 0h3m1 0h2m1 0h2m1 0h2m1 0h1M0 19.5h1m2 0h1m1 0h1m1 0h3m4 0h1m3 0h1m1 0h2m2 0h1m2 0h1M0 20.5h1m4 0h2m2 0h3m3 0h4m1 0h5m1 0h3M8 21.5h6m3 0h4m3 0h5M0 22.5h7m2 0h3m1 0h5m1 0h2m1 0h1m1 0h3M0 23.5h1m5 0h1m1 0h2m2 0h2m2 0h1m1 0h3m3 0h1M0 24.5h1m1 0h3m1 0h1m1 0h2m1 0h2m1 0h1m2 0h1m2 0h5m1 0h3M0 25.5h1m1 0h3m1 0h1m1 0h1m1 0h2m5 0h5m3 0h4M0 26.5h1m1 0h3m1 0h1m1 0h2m2 0h5m1 0h1m2 0h7M0 27.5h1m5 0h1m2 0h1m2 0h3m1 0h1m2 0h2m1 0h1m2 0h1m1 0h1M0 28.5h7m1 0h1m1 0h1m1 0h1m4 0h1m1 0h1m6 0h1"/></svg>
     <p class="qr-url">jal0340-sudo.github.io/2026-bygm</p>
+  </div>
+</dialog>
+
+<!-- 개설된 수업 목록 (확인만 가능, 삭제 기능 없음) -->
+<dialog class="qr-dialog list-dialog" id="listDialog" aria-labelledby="listTitle">
+  <div class="qr-box list-box">
+    <button type="button" class="qr-close" data-close aria-label="닫기">×</button>
+    <h2 id="listTitle">개설된 수업</h2>
+    <p>개설된 수업은 확인만 할 수 있고, 다른 선생님이 지울 수 없어요. 학생 보호를 위해 수업 코드는 앞 두 자리만 보여요.<br>1년 동안 새로 저장된 글이 없는 수업은 자동으로 삭제돼요.</p>
+    <div class="class-list" id="classList"></div>
   </div>
 </dialog>
 
@@ -1361,16 +1501,20 @@ function toast(msg) {
   toast.timer = setTimeout(() => t.classList.remove('show'), 2600);
 }
 
-/* ---------- 로그인·저장 (선생님 구글 드라이브) ----------
-   SAVE_URL: apps-script/Code.gs 를 선생님 계정으로 '웹 앱' 배포한 뒤 받은 주소(…/exec)
-   자세한 방법은 apps-script/설치안내.md 참고 */
-const SAVE_URL = 'https://script.google.com/macros/s/AKfycbwICW7FBGXwvq8CHwK_QYt2enfADM0kmEOTPZyHAjvkAtGxp3wcjNC_HdKmFu4OwYM4sg/exec';
-const LAST_KEY = 'geultium-last';   // 이 탭에서 마지막으로 쓴 학번·이름(입력 칸 채우기용, 비밀번호는 저장하지 않음)
-let user = null;          // { id: '10101', name: '홍길동', pw: '…' } — 메모리에만 둠(새로 고침하면 다시 로그인)
+/* ---------- 수업·로그인·저장 ----------
+   REGISTRY_URL: 수업 목록 서버(apps-script/Code.gs). 수업명·수업 코드·저장 서버 주소만 보관한다.
+   학생 글과 비밀번호는 수업을 개설한 선생님의 저장 서버(save-server/Code.gs)로 바로 간다. */
+const REGISTRY_URL = 'https://script.google.com/macros/s/AKfycbwICW7FBGXwvq8CHwK_QYt2enfADM0kmEOTPZyHAjvkAtGxp3wcjNC_HdKmFu4OwYM4sg/exec';
+const SERVER_CODE_URL = 'save-server/Code.gs';
+const SERVER_URL_RE = /^https:\/\/script\.google\.com\/(a\/[^\/]+\/)?macros\/s\/[\w-]{20,}\/exec$/;
+const LAST_KEY = 'geultium-last';   // 이 탭에서 마지막으로 쓴 수업 코드·학번·이름(입력 칸 채우기용, 비밀번호는 저장하지 않음)
+let user = null;          // { id, name, pw, cls: { code, name, url } } — 메모리에만 둠(새로 고침하면 다시 로그인)
+let cls = null;           // 로그인 화면에서 수업 코드로 찾은 수업
 let lastSaved = null;     // 마지막으로 저장(또는 불러온) 글
 let saving = false;
 
 const userTitle = () => user ? `${user.id} ${user.name}` : '';
+const docTitle = () => user ? `${user.cls.name}(${user.id} ${user.name})` : '';
 function readLast() {
   try { return JSON.parse(sessionStorage.getItem(LAST_KEY)) || null; } catch (e) { return null; }
 }
@@ -1382,16 +1526,19 @@ function renderUser() {
   document.body.classList.toggle('logged', !!user);
   document.querySelectorAll('[data-user]').forEach(el => { el.hidden = !user; });
   document.querySelectorAll('[data-user-name]').forEach(el => { el.textContent = userTitle(); });
+  document.querySelectorAll('[data-doc-title]').forEach(el => { el.textContent = docTitle(); });
+  document.querySelectorAll('[data-class-name]').forEach(el => { el.textContent = user ? user.cls.name : ''; });
 }
 
-/** 저장 서버에 요청한다. 실패하면 code(NEW·WRONG·LOCKED…)가 붙은 오류를 던진다. */
-async function callServer(body) {
+/** 서버(수업 목록 또는 저장 서버)에 요청한다. 실패하면 code(NEW·WRONG·LOCKED…)가 붙은 오류를 던진다. */
+async function callServer(url, body) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 30000);
   try {
     // 본문을 문자열로 보내야(text/plain) 브라우저가 사전 요청 없이 바로 보낸다
-    const res = await fetch(SAVE_URL, { method: 'POST', body: JSON.stringify(body), signal: ctrl.signal });
-    const data = await res.json();
+    const res = await fetch(url, { method: 'POST', body: JSON.stringify(body), signal: ctrl.signal });
+    let data;
+    try { data = await res.json(); } catch (e) { throw Object.assign(new Error('서버가 올바르게 응답하지 않아요.'), { code: 'BADSERVER' }); }
     if (!data.ok) throw Object.assign(new Error(data.error || '서버 오류'), { code: data.code });
     return data;
   } catch (err) {
@@ -1434,7 +1581,6 @@ function applyLoaded(d) {
 async function saveText() {
   if (saving) return;
   if (!user) { location.hash = 'home'; return; }
-  if (!SAVE_URL) { toast('아직 저장 주소가 설정되지 않았어요. 선생님께 알려 주세요.'); return; }
   const text = editor.value;
   if (!text.trim() && !confirm('글이 비어 있어요. 빈 글로 덮어쓸까요?')) return;
   saving = true;
@@ -1442,17 +1588,48 @@ async function saveText() {
   btn.disabled = true;
   updateSaveState('저장하는 중…');
   try {
-    const d = await callServer({ action: 'save', id: user.id, name: user.name, pw: user.pw, text });
+    const { code, url } = user.cls;
+    const d = await callServer(url, { action: 'save', code, id: user.id, name: user.name, pw: user.pw, text });
+    callServer(REGISTRY_URL, { action: 'touch', code }).catch(() => {});   // 수업의 '마지막 저장' 시각을 새로 고침(1년 기한 연장)
     lastSaved = text;
     updateSaveState.at = hhmm(new Date(d.updated));
     toast(d.created ? `‘${d.title}’ 문서를 새로 만들어 저장했어요.` : `‘${d.title}’ 문서에 덮어써서 저장했어요.`);
   } catch (err) {
-    const hint = (err.code === 'WRONG' || err.code === 'NEW') ? ' 글을 [복사]해 두고 다시 로그인해 주세요.' : '';
+    const hint = (err.code === 'WRONG' || err.code === 'NEW' || err.code === 'NOCLASS') ? ' 글을 [복사]해 두고 다시 로그인해 주세요.' : '';
     toast(`저장하지 못했어요: ${err.message}${hint}`);
   } finally {
     saving = false;
     btn.disabled = false;
     updateSaveState();
+  }
+}
+
+/** 수업 코드 칸에 6자리를 다 쓰면 수업 목록 서버에서 수업명을 찾아 옆에 보여 준다 */
+const lookupCache = new Map();
+async function lookupCode() {
+  const inp = $('#loginCode');
+  const out = $('#codeClass');
+  const code = inp.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+  if (inp.value !== code) inp.value = code;
+  if (cls && cls.code === code) return cls;
+  cls = null;
+  const seq = lookupCode.seq = (lookupCode.seq || 0) + 1;
+  out.className = 'code-class';
+  if (code.length < 6) { out.textContent = code ? '6자리를 모두 써 주세요' : '선생님께 받은 6자리 코드'; return null; }
+  out.textContent = '수업을 찾는 중…';
+  try {
+    let d = lookupCache.get(code);
+    if (!d) { d = await callServer(REGISTRY_URL, { action: 'lookup', code }); lookupCache.set(code, d); }
+    if (seq !== lookupCode.seq) return cls;
+    cls = { code: d.code, name: d.name, url: d.url };
+    out.textContent = d.name;
+    out.classList.add('ok');
+    return cls;
+  } catch (err) {
+    if (seq !== lookupCode.seq) return cls;
+    out.textContent = err.code === 'NOCLASS' ? err.message + ' 다시 확인해 주세요.' : err.message;
+    out.classList.add('bad');
+    return null;
   }
 }
 
@@ -1462,38 +1639,40 @@ async function login(e) {
   const name = $('#loginName').value.trim().replace(/\s+/g, ' ');
   const msg = $('#loginMsg');
   msg.className = 'login-msg';
+  const c = cls || await lookupCode();
+  if (!c) { msg.textContent = '선생님께 받은 수업 코드를 바르게 써 주세요.'; $('#loginCode').focus(); return; }
   if (!/^\d{4,6}$/.test(id)) { msg.textContent = '학번을 숫자로 써 주세요. (예: 10101)'; $('#loginId').focus(); return; }
   if (!/^[가-힣A-Za-z ]{2,20}$/.test(name)) { msg.textContent = '이름을 바르게 써 주세요.'; $('#loginName').focus(); return; }
   const pw = $('#loginPw').value;
   if (pw.length < 4) { msg.textContent = '비밀번호를 4자 이상 써 주세요.'; $('#loginPw').focus(); return; }
   const isNew = !$('#pwNew').hidden;
   if (isNew && $('#loginPw2').value !== pw) { msg.textContent = '두 비밀번호가 서로 달라요. 다시 확인해 주세요.'; $('#loginPw2').focus(); return; }
-  writeLast({ id, name });
+  writeLast({ code: c.code, id, name });
 
-  let data = { exists: false };
-  if (SAVE_URL) {
-    msg.className = 'login-msg ok';
-    msg.textContent = isNew ? '비밀번호를 정하는 중…' : '로그인하는 중…';
-    $('#btnLogin').disabled = true;
-    try {
-      data = await callServer({ action: isNew ? 'register' : 'login', id, name, pw });
-    } catch (err) {
-      msg.className = 'login-msg';
-      if (err.code === 'NEW') {
-        $('#pwNew').hidden = false;
-        $('#btnLogin').firstChild.textContent = '비밀번호 정하고 시작하기 ';
-        msg.textContent = '';
-        $('#loginPw2').focus();
-      } else {
-        msg.textContent = err.message;
-        if (err.code === 'WRONG') { $('#loginPw').value = ''; $('#loginPw').focus(); }
-      }
-      return;
-    } finally {
-      $('#btnLogin').disabled = false;
+  let data;
+  msg.className = 'login-msg ok';
+  msg.textContent = isNew ? '비밀번호를 정하는 중…' : '로그인하는 중…';
+  $('#btnLogin').disabled = true;
+  try {
+    data = await callServer(c.url, { action: isNew ? 'register' : 'login', code: c.code, id, name, pw });
+  } catch (err) {
+    msg.className = 'login-msg';
+    if (err.code === 'NEW') {
+      $('#pwNew').hidden = false;
+      $('#btnLogin').firstChild.textContent = '비밀번호 정하고 시작하기 ';
+      msg.textContent = '';
+      $('#loginPw2').focus();
+    } else if (err.code === 'NET' || err.code === 'BADSERVER') {
+      msg.textContent = '이 수업의 저장 서버에 연결하지 못했어요. 인터넷 연결을 확인하고, 계속 안 되면 선생님께 알려 주세요.';
+    } else {
+      msg.textContent = err.message;
+      if (err.code === 'WRONG') { $('#loginPw').value = ''; $('#loginPw').focus(); }
     }
+    return;
+  } finally {
+    $('#btnLogin').disabled = false;
   }
-  user = { id, name, pw };
+  user = { id, name, pw, cls: c };
   lastSaved = null; updateSaveState.at = null;
   renderUser();
   resetLoginForm();
@@ -1523,6 +1702,100 @@ function logout() {
   resetLoginForm();
   if (location.hash !== '#home') location.hash = 'home'; else route();
   toast('로그아웃했어요.');
+}
+
+/* ---------- 선생님 설정: 수업 개설 ---------- */
+let serverCode = null;     // 저장 서버 코드(save-server/Code.gs) — 선생님 설정 화면에 들어오면 미리 받아 둔다
+let pendingBind = null;    // 수업 코드는 받았지만 저장 서버 연결에 실패한 수업
+function loadServerCode() {
+  if (!serverCode) serverCode = fetch(SERVER_CODE_URL, { cache: 'no-cache' }).then(r => { if (!r.ok) throw new Error(); return r.text(); }).catch(e => { serverCode = null; throw e; });
+  return serverCode;
+}
+
+async function copyText(text) {
+  try { await navigator.clipboard.writeText(text); return true; } catch (e) {
+    const ta = document.createElement('textarea');
+    ta.value = text; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    const ok = document.execCommand('copy');
+    ta.remove();
+    return ok;
+  }
+}
+
+const ymd = iso => new Date(iso).toLocaleDateString('ko-KR', { year: 'numeric', month: 'long', day: 'numeric' });
+
+async function createClass(e) {
+  e.preventDefault();
+  const msg = $('#classMsg');
+  const name = $('#newClassName').value.trim().replace(/\s+/g, ' ');
+  const url = $('#serverUrl').value.trim();
+  msg.className = 't-msg';
+  if (!name) { msg.textContent = '수업명을 써 주세요.'; $('#newClassName').focus(); return; }
+  if (/[\\\/:*?"<>|()]/.test(name)) { msg.textContent = '수업명에는 괄호나 \\ / : * ? " < > | 같은 기호를 쓸 수 없어요.'; $('#newClassName').focus(); return; }
+  if (!SERVER_URL_RE.test(url)) { msg.textContent = '저장 서버 주소는 https://script.google.com/macros/s/…/exec 모양이어야 해요. 배포할 때 나온 ‘웹 앱 URL’을 붙여 넣어 주세요.'; $('#serverUrl').focus(); return; }
+  const btn = $('#btnCreate');
+  btn.disabled = true;
+  msg.className = 't-msg ok';
+  try {
+    msg.textContent = '저장 서버를 확인하는 중… (처음에는 10초쯤 걸릴 수 있어요)';
+    let p;
+    try { p = await callServer(url, { action: 'ping', name }); } catch (err) {
+      throw new Error(err.code === 'NET' || err.code === 'BADSERVER'
+        ? '저장 서버에 연결하지 못했어요. 주소가 맞는지, 배포할 때 ‘액세스 권한이 있는 사용자: 모든 사용자’로 정했는지, [액세스 승인]을 마쳤는지 확인해 주세요.'
+        : err.message);
+    }
+    if (p.service !== '글틔움 저장 서버') throw new Error('글틔움 저장 서버 주소가 아니에요. 1번 안내대로 만든 웹 앱 URL을 붙여 넣어 주세요.');
+    if (p.nameTaken) throw new Error('이 저장 서버에 같은 이름의 수업이 이미 있어요. 수업명을 조금 바꿔 주세요. (예: 2학년 3반 국어 2027)');
+    msg.textContent = '수업 코드를 만드는 중…';
+    const r = await callServer(REGISTRY_URL, { action: 'create', name, url });
+    pendingBind = { code: r.code, name: r.name, url };
+    $('#resName').textContent = r.name;
+    $('#resCode').textContent = r.code;
+    $('#resExpire').textContent = ymd(r.expires);
+    msg.textContent = '저장 서버에 수업을 연결하는 중…';
+    await bindClass();
+    $('#classForm').hidden = true;
+    $('#classResult').hidden = false;
+    msg.textContent = '';
+    $('#classResult').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  } catch (err) {
+    msg.className = 't-msg';
+    msg.textContent = err.message;
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/** 수업 목록에 등록된 수업 코드를 선생님 저장 서버에 연결한다 (실패하면 [다시 연결하기]) */
+async function bindClass() {
+  if (!pendingBind) return;
+  const { code, name, url } = pendingBind;
+  try {
+    await callServer(url, { action: 'bind', code, name });
+    pendingBind = null;
+    $('#resBindFail').hidden = true;
+    return true;
+  } catch (err) {
+    $('#resBindFail').hidden = false;
+    $('#resBindFail').firstChild.textContent = `저장 서버에 수업을 연결하지 못했어요. (${err.message}) `;
+    return false;
+  }
+}
+
+async function showClassList() {
+  const box = $('#classList');
+  box.innerHTML = '<p class="empty">개설된 수업을 불러오는 중…</p>';
+  $('#listDialog').showModal();
+  try {
+    const d = await callServer(REGISTRY_URL, { action: 'list' });
+    if (!d.classes.length) { box.innerHTML = '<p class="empty">아직 개설된 수업이 없어요.</p>'; return; }
+    box.innerHTML = `<table><thead><tr><th>수업명</th><th>수업 코드</th><th>개설일</th><th>마지막 저장</th><th>자동 삭제 예정</th></tr></thead><tbody>${
+      d.classes.map(c => `<tr><td>${esc(c.name)}</td><td class="mono">${esc(c.code)}</td><td>${ymd(c.created)}</td><td>${c.last === c.created ? '아직 없음' : ymd(c.last)}</td><td>${ymd(c.expires)}</td></tr>`).join('')
+    }</tbody></table>`;
+  } catch (err) {
+    box.innerHTML = `<p class="empty">목록을 불러오지 못했어요. ${esc(err.message)}</p>`;
+  }
 }
 
 function updateStats() {
@@ -1577,14 +1850,19 @@ function resetResults() {
 function route() {
   if (location.hash === '#write' && !user) {
     history.replaceState(null, '', '#home');
-    setTimeout(() => { $('#loginMsg').textContent = '먼저 학번과 이름을 쓰고 로그인해 주세요.'; $('#loginId').focus(); }, 0);
+    setTimeout(() => { $('#loginMsg').textContent = '먼저 수업 코드와 학번·이름을 쓰고 로그인해 주세요.'; $('#loginCode').focus(); }, 0);
   }
   const work = location.hash === '#write';
+  const teacher = location.hash === '#teacher';
   $('#pageHome').hidden = work;
   $('#pageWork').hidden = !work;
-  document.title = work ? '글다듬기 – 글틔움' : '글틔움';
-  document.querySelectorAll('[data-nav]').forEach(a => a.classList.toggle('on', a.dataset.nav === (location.hash === '#guide' ? 'guide' : 'home')));
-  if (work) { window.scrollTo(0, 0); updateSteps(); }
+  $('#homeMain').hidden = teacher;
+  $('#teacherMain').hidden = !teacher;
+  document.title = work ? '글다듬기 – 글틔움' : teacher ? '선생님 설정 – 글틔움' : '글틔움';
+  const nav = location.hash === '#guide' ? 'guide' : teacher ? 'teacher' : 'home';
+  document.querySelectorAll('[data-nav]').forEach(a => a.classList.toggle('on', a.dataset.nav === nav));
+  if (teacher) { loadServerCode().catch(() => {}); window.scrollTo(0, 0); }
+  else if (work) { window.scrollTo(0, 0); updateSteps(); }
   else if (location.hash === '#guide') $('#guide').scrollIntoView({ behavior: 'smooth' });
   else window.scrollTo(0, 0);
 }
@@ -1895,9 +2173,11 @@ function init() {
 
   // 로그인·저장
   renderUser();
-  const last = readLast();   // 새로 고침했을 때 학번·이름은 채워 두고 비밀번호만 다시 쓰게 한다
-  if (last) { $('#loginId').value = last.id || ''; $('#loginName').value = last.name || ''; }
-  ['#loginId', '#loginName'].forEach(s => $(s).addEventListener('input', () => {
+  const last = readLast();   // 새로 고침했을 때 수업 코드·학번·이름은 채워 두고 비밀번호만 다시 쓰게 한다
+  if (last) { $('#loginCode').value = last.code || ''; $('#loginId').value = last.id || ''; $('#loginName').value = last.name || ''; }
+  if ($('#loginCode').value) lookupCode();
+  $('#loginCode').addEventListener('input', () => { clearTimeout(lookupCode.timer); lookupCode.timer = setTimeout(lookupCode, 250); });
+  ['#loginCode', '#loginId', '#loginName'].forEach(s => $(s).addEventListener('input', () => {
     if ($('#pwNew').hidden) return;   // 학번·이름을 바꾸면 '새 비밀번호 정하기' 상태를 풀고 다시 확인
     $('#pwNew').hidden = true; $('#loginPw2').value = '';
     $('#btnLogin').firstChild.textContent = '로그인하고 시작하기 ';
@@ -1914,6 +2194,31 @@ function init() {
   $('#btnQr').addEventListener('click', () => qr.showModal());
   $('#qrClose').addEventListener('click', () => qr.close());
   qr.addEventListener('click', e => { if (e.target === qr) qr.close(); });
+
+  // 선생님 설정: 수업 개설
+  $('#classForm').addEventListener('submit', createClass);
+  $('#btnCopyServer').addEventListener('click', async () => {
+    try {
+      const code = await loadServerCode();
+      toast(await copyText(code) ? '저장 서버 코드를 복사했어요. Apps Script 편집기에 붙여 넣으세요.' : '복사하지 못했어요. 다시 눌러 주세요.');
+    } catch (e) { toast('저장 서버 코드를 불러오지 못했어요. 인터넷 연결을 확인해 주세요.'); }
+  });
+  $('#btnCopyCode').addEventListener('click', async () => {
+    if (await copyText($('#resCode').textContent)) toast('수업 코드를 복사했어요.');
+  });
+  $('#btnRebind').addEventListener('click', async () => { if (await bindClass()) toast('저장 서버에 연결했어요.'); });
+  $('#btnAnother').addEventListener('click', () => {
+    if (pendingBind && !confirm('아직 저장 서버에 연결되지 않은 수업이 있어요. 그래도 새 수업을 개설할까요?')) return;
+    pendingBind = null;
+    $('#classResult').hidden = true;
+    $('#classForm').hidden = false;
+    $('#newClassName').value = '';
+    $('#newClassName').focus();
+  });
+  const list = $('#listDialog');
+  $('#btnClassList').addEventListener('click', showClassList);
+  list.querySelector('[data-close]').addEventListener('click', () => list.close());
+  list.addEventListener('click', e => { if (e.target === list) list.close(); });
 
   // 페이지 이동
   $('#btnStart').addEventListener('click', () => { location.hash = 'write'; });
