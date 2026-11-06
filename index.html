@@ -2157,16 +2157,16 @@ function syncBackdrop() {
   bd.scrollTop = editor.scrollTop;
 }
 
-/** 편집창에서 표시된 곳을 누르면 오른쪽 설명 카드로 이동한다. */
+/** 편집창에서 표시된 곳을 누르면 오른쪽 설명 카드로 이동한다. (2단계 탭을 보고 있을 때는 탭을 바꾸지 않음) */
 function cardAtCaret() {
   if (!marks.length || editor.selectionStart !== editor.selectionEnd) return;
+  if ($('#panel1').hidden) return;
   if (window.matchMedia('(max-width: 899px)').matches) return;   // 좁은 화면에서는 글 쓰는 중에 화면이 튀지 않게
   const pos = editor.selectionStart;
   const hit = visibleMarks().filter(m => m.start <= pos && pos < m.end)
     .sort((x, y) => SENT_CATS.has(x.cat) - SENT_CATS.has(y.cat));   // 낱말 표시를 문장 표시보다 먼저
   const card = hit.map(m => document.getElementById('card-' + m.id)).find(Boolean);
   if (!card) return;
-  showTab(1);
   card.scrollIntoView({ behavior: 'smooth', block: 'center' });
   card.classList.remove('flash'); void card.offsetWidth;
   card.classList.add('flash');
